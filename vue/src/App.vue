@@ -109,6 +109,25 @@
             </div>
           </section>
 
+          <!-- SECTION: Cache Buster -->
+          <section class="form-section">
+            <div class="section-label">
+              <span class="section-dot active-dot"></span>
+              Stremio Cache Buster
+              <span class="section-badge">Optional</span>
+            </div>
+            <p class="section-desc">Stremio caches Addons heavily. If your Addon stops working due to Stremio caching the old manifest, change this value (e.g. from "1" to "2") to force Stremio to fetch the latest Addon URL.</p>
+            <div class="input-group">
+              <label class="input-label">Version String</label>
+              <input
+                type="text"
+                v-model="state.cacheBuster"
+                placeholder="e.g. 1"
+                class="styled-input"
+              />
+            </div>
+          </section>
+
           <!-- SECTION: Add List -->
           <section class="form-section">
             <div class="section-label">
@@ -217,6 +236,7 @@ const state = reactive({
   traktListId: '',
   traktSort: '',
   traktCategory: '',
+  cacheBuster: '',
   lists: [],
   addonUrl: '',
 });
@@ -237,6 +257,7 @@ onMounted(() => {
         }
         if (decoded.upstashUrl) state.upstashUrl = decoded.upstashUrl;
         if (decoded.upstashToken) state.upstashToken = decoded.upstashToken;
+        if (decoded.cacheBuster) state.cacheBuster = decoded.cacheBuster;
         if (decoded.lists && Array.isArray(decoded.lists)) state.lists = decoded.lists;
         if (state.traktClientId && state.lists.length > 0) generateAddon();
       }
@@ -289,6 +310,7 @@ function generateAddon() {
   };
   if (state.upstashUrl.trim()) config.upstashUrl = state.upstashUrl.trim();
   if (state.upstashToken.trim()) config.upstashToken = state.upstashToken.trim();
+  if (state.cacheBuster.trim()) config.cacheBuster = state.cacheBuster.trim();
 
   localStorage.setItem('stremio_trakt_client_id', config.traktClientId);
 

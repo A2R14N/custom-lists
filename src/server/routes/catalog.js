@@ -62,7 +62,7 @@ export async function handleCatalog(req, res, mixpanel) {
     // 2. Fetch Live from Trakt.tv (BYOK Logic)
     try {
       console.log(`[Trakt Live Fetch] Fetching list "${listId}" from user "${username}" using BYOK token...`);
-      
+
       let items = [];
       let page = 1;
       const limit = 1000;
@@ -73,7 +73,7 @@ export async function handleCatalog(req, res, mixpanel) {
         if (sort) queryParams.push(`sort=${sort}`);
         queryParams.push(`page=${page}`);
         queryParams.push(`limit=${limit}`);
-        
+
         const queryString = `?${queryParams.join('&')}`;
 
         const resTrakt = await axios.get(`https://api.trakt.tv/users/${username}/lists/${listId}/items${queryString}`, {
@@ -94,7 +94,7 @@ export async function handleCatalog(req, res, mixpanel) {
         } else {
           totalPages = 1;
         }
-        
+
         page++;
       } while (page <= totalPages);
       const resultItems = [];
@@ -127,7 +127,7 @@ export async function handleCatalog(req, res, mixpanel) {
             return meta;
           })
         );
-        
+
         for (const meta of metas) {
           if (meta) resultItems.push(meta);
         }
@@ -155,4 +155,3 @@ export async function handleCatalog(req, res, mixpanel) {
   // Fallback empty response
   res.send({ metas: [] });
 }
-
