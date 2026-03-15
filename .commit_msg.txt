@@ -1,0 +1,11 @@
+v1.1.0: Serverless Architecture & Premium UI Redesign
+
+- Architecture: Migrated to a zero-server-storage model. Every user's configuration and Trakt lists are now cached exclusively in their personal Upstash Redis database.
+- Backend: Removed server-side Redis initialization.
+- Backend: Added new /api/config and /api/cache/:userId endpoints to handle saving directly to user Upstash and streaming SSE cache progress.
+- Install URL: Shortened the install URL significantly to /{userId}/manifest.json where userId is a base64url of the user's Upstash credentials.
+- Manifest: Updated description and logo URL.
+- Frontend: Complete premium redesign with dark theme (#080a12), noise overlay, and SVG icons.
+- Frontend: Added Upstash validation gateway (Upstash is now mandatory).
+- Frontend: Added live caching progress indicator (x/y) via SSE when adding Trakt lists.
+- Assets: Changed addon icon to the new purple/blue icon.png.
