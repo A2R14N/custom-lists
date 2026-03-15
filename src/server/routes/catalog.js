@@ -62,42 +62,75 @@ export async function handleCatalog(req, res, mixpanel) {
     // 2. Fetch Live from Trakt.tv (BYOK Logic)
     try {
       console.log(`[Trakt Live Fetch] Fetching list "${listId}" from user "${username}" using BYOK token...`);
-      const sortQuery = sort ? `?sort=${sort}` : '';
-      const resTrakt = await axios.get(`https://api.trakt.tv/users/${username}/lists/${listId}/items${sortQuery}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'trakt-api-version': '2',
-          'trakt-api-key': traktClientId
-        },
-        timeout: 10000
-      });
+      
+      let items = [];
+      let page = 1;
+      const limit = 1000;
+      let totalPages = 1;
 
-      const items = resTrakt.data || [];
-      const resultItems = [];
+      do {
+        const queryParams = [];
+        if (sort) queryParams.push(`sort=${sort}`);
+        queryParams.push(`page=${page}`);
+        queryParams.push(`limit=${limit}`);
+        
+        const queryString = `?${queryParams.join('&')}`;
 
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        const type = item.type;
-        if (type !== 'movie' && type !== 'show') continue;
+        const resTrakt = await axios.get(`https://api.trakt.tv/users/${username}/lists/${listId}/items${queryString}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'trakt-api-version': '2',
+            'trakt-api-key': traktClientId
+          },
+          timeout: 10000
+        });
 
-        const media = item[type];
-        if (!media) continue;
+        const pageData = resTrakt.data || [];
+        items = items.concat(pageData);
 
-        const imdbId = media.ids?.imdb;
-        const title = media.title;
-        const year = media.year;
-
-        if (!imdbId) continue;
-
-        const stremioType = type === 'show' ? 'series' : 'movie';
-        let meta = await fetchCinemetaMeta(imdbId, stremioType, title);
-
-        if (!meta) {
-          meta = getBasicMeta(imdbId, title, stremioType);
-          meta.releaseInfo = year ? year.toString() : undefined;
+        const pageCountHeader = resTrakt.headers['x-pagination-page-count'];
+        if (pageCountHeader) {
+          totalPages = parseInt(pageCountHeader, 10) || 1;
+        } else {
+          totalPages = 1;
         }
+        
+        page++;
+      } while (page <= totalPages);
+      const resultItems = [];
+      const chunkSize = 20;
 
-        resultItems.push(meta);
+      for (let i = 0; i < items.length; i += chunkSize) {
+        const chunk = items.slice(i, i + chunkSize);
+        const metas = await Promise.all(
+          chunk.map(async (item) => {
+            const type = item.type;
+            if (type !== 'movie' && type !== 'show') return null;
+
+            const media = item[type];
+            if (!media) return null;
+
+            const imdbId = media.ids?.imdb;
+            const title = media.title;
+            const year = media.year;
+
+            if (!imdbId) return null;
+
+            const stremioType = type === 'show' ? 'series' : 'movie';
+            let meta = await fetchCinemetaMeta(imdbId, stremioType, title);
+
+            if (!meta) {
+              meta = getBasicMeta(imdbId, title, stremioType);
+              meta.releaseInfo = year ? year.toString() : undefined;
+            }
+
+            return meta;
+          })
+        );
+        
+        for (const meta of metas) {
+          if (meta) resultItems.push(meta);
+        }
       }
 
       // 3. Save to Upstash Redis Permanently
