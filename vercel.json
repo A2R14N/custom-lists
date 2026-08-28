@@ -1,11 +1,23 @@
 {
-    "version": 2,
-    "buildCommand": "cd vue && npm install && npm run build",
-    "outputDirectory": "vue/dist",
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/api/index"
-        }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "installCommand": "npm ci",
+  "buildCommand": "npm test && npm --prefix vue ci && npm --prefix vue run build",
+  "outputDirectory": "vue/dist",
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 60,
+      "includeFiles": "vue/dist/**",
+      "excludeFiles": "{test/**,**/.env,**/.env.*,**/*.log}"
+    }
+  },
+  "headers": [{
+    "source": "/(.*)",
+    "headers": [
+      { "key": "Cache-Control", "value": "private, no-store" },
+      { "key": "Referrer-Policy", "value": "no-referrer" },
+      { "key": "X-Content-Type-Options", "value": "nosniff" }
     ]
+  }],
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }]
 }

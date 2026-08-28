@@ -3,14 +3,15 @@ node_modules
 vue/dist/error.log
 .idea
 
-# Environment files
+# Local environment files (never commit credentials)
 .env
-.env.local
-.env.production
-# Keep pre-configured frontend env files
-!vue/.env
-!vue/.env.development
-!vue/.env.production
+.env.*
+!.env.example
+
+# Generated builds and local agent work
+/vue/dist/
+.work/
+.codex/
 
 # Logs
 *.log
@@ -47,3 +48,4 @@ jspm_packages/
 cache/
 
 
+.vercel

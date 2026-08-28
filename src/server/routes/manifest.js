@@ -1,75 +1,36 @@
-import { redisFromUserId, decodeUserId } from './userconfig.js';
+import { redisFromUserId, readConfig } from '../../services/user-store.js';
+import { normalizeList, catalogId, listLabel } from '../../../shared/lists.js';
 
-/**
- * Build configured manifest route handler.
- * userId = base64url(upstashUrl + "|" + upstashToken)
- * Reads stremio:config from the user's own Upstash Redis to build the manifest.
- */
-export async function handleConfiguredManifest(req, res, mixpanel) {
-  res.setHeader('Cache-Control', 'max-age=3600,stale-while-revalidate=3600,stale-if-error=86400,public');
-  res.setHeader('content-type', 'application/json');
+function logoUrl(req) {
+  // Use the current deployment origin, never the private configuration path.
+  // Vercel terminates TLS in front of Express. Local Node remains HTTP by default.
+  const forwardedProtocol = req.get('x-forwarded-proto')?.split(',')[0].trim();
+  const protocol = process.env.VERCEL || forwardedProtocol === 'https' ? 'https' : req.protocol;
+  return new URL('/brand/custom-lists-icon-v1.png', `${protocol}://${req.get('host')}`).href;
+}
 
-  const userId = req.params.configuration;
-  if (!userId) {
-    return res.status(400).json({ error: 'Missing userId in URL.' });
-  }
+function manifest(req, lists = []) {
+  const catalogs = lists.map(input => {
+    const list = normalizeList(input);
+    return { id: catalogId(list), type: list.categoryName, name: listLabel(list) };
+  });
+  return {
+    // Stable identity and legacy IDs keep existing installations working.
+    id: 'community.trakt.custom-lists',
+    logo: logoUrl(req),
+    version: '1.3.0', name: 'Custom Lists',
+    description: 'MDBList, TMDB, IMDb and WeTrakr export catalogs, plus preserved Trakt snapshots. Your configuration and cached titles live in your own Upstash Redis.',
+    catalogs, resources: ['catalog'], types: [...new Set(['movie', 'series', ...catalogs.map(item => item.type)])],
+    idPrefixes: ['tt'], behaviorHints: { configurable: true },
+  };
+}
 
-  let config = { lists: [] };
+export async function handleConfiguredManifest(req, res) {
   try {
-    const redis = redisFromUserId(userId);
-    const raw = await redis.get('stremio:config');
-    if (raw) {
-      config = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    }
-  } catch (e) {
-    console.error('[Manifest] Failed to load config from user Redis:', e.message);
-  }
-
-  const catalogs = (config.lists || []).map((list) => {
-    const sortSuffix = list.sort ? `:${list.sort}` : '';
-    return {
-      id: `trakt:${list.username}:${list.listId}${sortSuffix}`,
-      type: list.categoryName,
-      name: `${list.username} / ${list.listId}`,
-    };
-  });
-
-  const layoutTypes = ['movie', 'series'];
-  catalogs.forEach((cat) => {
-    if (!layoutTypes.includes(cat.type)) layoutTypes.push(cat.type);
-  });
-
-  res.send({
-    id: 'community.trakt.custom-lists',
-    logo: 'https://raw.githubusercontent.com/A2R14N/stremio-custom-lists/main/icon.png',
-    version: process.env.npm_package_version || '1.1.0',
-    name: 'Stremio Custom Lists',
-    description: 'Import personal Trakt.tv watchlists into Stremio. Serverless, zero tracking, and fully cached on your own Upstash Redis.',
-    catalogs,
-    resources: ['catalog'],
-    types: layoutTypes,
-    idPrefixes: ['tt'],
-    behaviorHints: { configurable: true },
-  });
+    const redis = redisFromUserId(req.params.configuration);
+    const config = await readConfig(redis);
+    return res.json(manifest(req, config.lists || []));
+  } catch { return res.status(502).json({ error: 'Could not read the addon configuration from your Redis.' }); }
 }
 
-/**
- * Default fallback manifest handler (no userId in URL).
- */
-export function handleDefaultManifest(req, res, mixpanel) {
-  res.setHeader('Cache-Control', 'max-age=86400,stale-while-revalidate=86400,stale-if-error=86400,public');
-  res.setHeader('content-type', 'application/json');
-
-  res.send({
-    id: 'community.trakt.custom-lists',
-    logo: 'https://raw.githubusercontent.com/A2R14N/stremio-custom-lists/main/icon.png',
-    version: process.env.npm_package_version || '1.1.0',
-    name: 'Stremio Custom Lists',
-    description: 'Import personal Trakt.tv watchlists into Stremio. Serverless, zero tracking, and fully cached on your own Upstash Redis.',
-    catalogs: [],
-    resources: ['catalog'],
-    types: [],
-    idPrefixes: ['tt'],
-    behaviorHints: { configurable: true },
-  });
-}
+export function handleDefaultManifest(req, res) { return res.json(manifest(req)); }

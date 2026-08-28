@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:24-alpine
 
 RUN apk add --no-cache curl
 
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY vue/package*.json ./vue/
 
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 RUN cd vue && npm ci
 
 COPY . .

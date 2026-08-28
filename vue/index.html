@@ -1,23 +1,67 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8"/>
-    <link rel="icon" type="image/svg+xml" href="/vite.svg"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Stremio Custom Lists</title>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S47YFG3SDZ"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() {
-            dataLayer.push(arguments);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#090909" />
+    <meta
+      name="description"
+      content="Your taste. Your collection. Bring MDBList, TMDB and saved Trakt lists to Stremio and Nuvio, with your data in your own storage."
+    />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32-v1.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/brand/favicon-64-v1.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon-v1.png" />
+    <title>Custom Lists — Your taste. Your collection.</title>
+    <style>
+      html { color-scheme: dark; background: #090909; }
+      body { margin: 0; background: #090909; }
+      .boot-message {
+        max-width: 420px;
+        margin: 18vh auto;
+        padding: 28px;
+        font:
+          14px/1.7 system-ui,
+          sans-serif;
+        color: #eeeeee;
+      }
+      .boot-message h1 {
+        font-size: 28px;
+        letter-spacing: -1px;
+      }
+      .boot-message p {
+        color: #aaaaaa;
+      }
+      .boot-help {
+        opacity: 0;
+        animation: show-help 0s 8s forwards;
+      }
+      @keyframes show-help {
+        to {
+          opacity: 1;
         }
-        gtag('js', new Date());
-        gtag('config', 'G-S47YFG3SDZ');
-    </script>
-</head>
-<body>
-<div id="app"></div>
-<script type="module" src="/src/main.js"></script>
-</body>
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="boot-message">
+        <img src="/brand/custom-lists-mark-v1.png" width="48" height="48" alt="" />
+        <h1>Custom Lists.</h1>
+        <p>Opening your collection…</p>
+        <p class="boot-help">
+          Taking longer than expected? Try reloading. If a content blocker is
+          stopping this site’s scripts, review its settings for this site. Your
+          saved lists are unchanged.
+        </p>
+        <noscript
+          ><p>
+            JavaScript is required to configure your addon. Your existing
+            installed catalogs still work.
+          </p></noscript
+        >
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>

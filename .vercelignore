@@ -1,0 +1,15 @@
+# Never upload local credentials, dependencies, or stale build output.
+.git
+.env
+.env.*
+**/.env
+**/.env.*
+node_modules
+vue/node_modules
+vue/dist
+*.log
+**/*.log
+.work
+.codex
+.agents
+.commit_msg.txt

@@ -1,15 +1,5 @@
 {
-  "ignore": [
-    "cache/**/*",
-    "node_modules/**/*",
-    "vue/dist/**/*",
-    "*.log"
-  ],
-  "watch": [
-    "*.js",
-    "scripts/**/*.js",
-    "vue/src/**/*"
-  ],
-  "ext": "js,json,vue"
+  "ignore": ["cache/**/*", "node_modules/**/*", "vue/dist/**/*", "*.log"],
+  "watch": ["index.js", "src/**/*.js", "shared/**/*.js"],
+  "ext": "js,json"
 }
-
