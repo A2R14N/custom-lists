@@ -49,3 +49,7 @@ cache/
 
 
 .vercel
+
+# Local review reports
+/docs/nuvio-compatibility.md
+/reports/
