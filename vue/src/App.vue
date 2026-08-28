@@ -1055,6 +1055,7 @@ onMounted(() => {
               v-if="meta.poster"
               :src="meta.poster"
               :alt="meta.name"
+              decoding="async"
               loading="lazy"
               referrerpolicy="no-referrer"
               @error="failedPoster(meta)"

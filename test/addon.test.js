@@ -595,3 +595,35 @@ test('metadata fallback uses Cinemeta for MDBList entries without posters',async
   const metas=await resolvePage(mdb,{},[{imdb_id:'tt42',title:'Fallback',mediatype:'movie'}]);
   assert.equal(metas[0].name,'Cinemeta title');assert.equal(metas[0].id,'tt42');
 });
+test('UI preview bounds responses without changing addon pagination or full snapshots',async()=>{
+  const db=database();
+  const metas=Array.from({length:150},(_,i)=>({id:`tt${i}`,type:'movie',name:`Title ${i}`}));
+  await db.redis.set(catalogId(legacy),JSON.stringify(metas));db.redis.writes=[];
+  const path=`/${db.userId}/catalog/cartoon/${encodeURIComponent(catalogId(legacy))}`;
+  const preview=await request(path+'/skip=0.json?preview=1');
+  assert.deepEqual(preview.data.metas,metas.slice(0,12));
+  assert.match(preview.headers.get('cache-control'),/no-store/);
+  assert.equal((await request(path+'/skip=0.json')).data.metas.length,100);
+  assert.equal((await request(path+'.json')).data.metas.length,150);
+  assert.equal(db.redis.writes.length,0);
+});
+
+test('preview reuse deduplicates requests, isolates image failures and clears on reconnect',async()=>{
+  const db=database();await db.redis.set(CONFIG_KEY,{lists:[legacy]});
+  await db.redis.set(catalogId(legacy),JSON.stringify(cached));
+  const context=frontend(),{ui}=context;
+  ui.state.upstashUrl=db.upstashUrl;ui.state.upstashToken=db.upstashToken;await ui.connect();
+  const original=context.fetch;let calls=0;
+  context.fetch=(url,init)=>{if(url.includes('?preview=1')) calls++;return original(url,init);};
+  const [first,second]=await Promise.all([ui.previewList(ui.state.lists[0]),ui.previewList(ui.state.lists[0])]);
+  first[0].poster='';assert.equal(second[0].poster,cached[0].poster);
+  await ui.previewList(ui.state.lists[0]);assert.equal(calls,1);
+  await db.redis.set(catalogId(legacy),JSON.stringify([{...cached[0],name:'Updated'}]));
+  await ui.connect();assert.equal((await ui.previewList(ui.state.lists[0]))[0].name,'Updated');
+  assert.equal(calls,2);
+  ui.disconnect();ui.state.upstashUrl=db.upstashUrl;ui.state.upstashToken=db.upstashToken;await ui.connect();
+  context.fetch=async()=>new Response(JSON.stringify({error:'Unavailable'}),{status:502});
+  await assert.rejects(ui.previewList(ui.state.lists[0]),/Unavailable/);
+  context.fetch=original;
+  assert.equal((await ui.previewList(ui.state.lists[0]))[0].name,'Updated');
+});

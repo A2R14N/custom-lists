@@ -37,6 +37,8 @@ export function useCatalogs() {
     error: "",
     message: "",
   });
+  // Session-only previews: bounded, short-lived, and cleared when snapshots change.
+  const previews = new Map<string, { expires: number; data: Promise<Meta[]> }>();
   const state = reactive<CatalogState>(initial());
   const busy = computed(
     () => state.connecting || state.saving || state.importing,
@@ -132,6 +134,7 @@ export function useCatalogs() {
     ] as const) {
       state[key] = data[key] || "";
     }
+    previews.clear();
     state.lists = lists;
     state.connected = true;
     state.addonUrl = lists.length ? buildAddonUrl() : "";
@@ -319,6 +322,7 @@ export function useCatalogs() {
         item.itemCount = progress.done;
         item.coverPosters = progress.coverPosters || [];
       }
+      previews.clear();
       list.skipped = progress.skipped;
       state.message = `${listLabel(list)} is ready to watch.`;
     } catch (error) {
@@ -364,6 +368,7 @@ export function useCatalogs() {
         `/api/exports/${state.userId}`,
         { provider: list.provider || "wetrakr", sourceName: list.sourceName, categoryName, items: list.items },
       );
+      previews.clear();
       const key = catalogId(result.list);
       const existing = state.lists.filter(item => catalogId(item) === key);
       const status = { cached: true, itemCount: result.list.itemCount || 0,
@@ -406,12 +411,25 @@ export function useCatalogs() {
   }
 
   async function previewList(list: Catalog): Promise<Meta[]> {
-    const data = await request<{ metas: Meta[] }>(
-      `/${state.userId}/catalog/${encodeURIComponent(list.categoryName)}/${encodeURIComponent(catalogId(list))}/skip=0.json`,
-    );
-    return data.metas.slice(0, 12);
+    const key = `${state.userId}:${catalogId(list)}`;
+    let entry = previews.get(key);
+    if (!entry || entry.expires <= Date.now()) {
+      previews.delete(key);
+      if (previews.size >= 20) previews.delete(previews.keys().next().value!);
+      const data = request<{ metas: Meta[] }>(
+        `/${state.userId}/catalog/${encodeURIComponent(list.categoryName)}/${encodeURIComponent(catalogId(list))}/skip=0.json?preview=1`,
+      ).then(result => result.metas.slice(0, 12));
+      entry = { expires: Date.now() + 60000, data };
+      previews.set(key, entry);
+    }
+    try {
+      // Broken-image handling in the dialog must not mutate the cached preview.
+      return (await entry.data).map(meta => ({ ...meta }));
+    } catch (error) {
+      if (previews.get(key) === entry) previews.delete(key);
+      throw error;
+    }
   }
-
   function buildAddonUrl() {
     const base = (
       import.meta.env.VITE_APP_URL || window.location.origin
@@ -423,7 +441,10 @@ export function useCatalogs() {
   }
 
   function disconnect() {
-    if (!busy.value) Object.assign(state, initial());
+    if (!busy.value) {
+      previews.clear();
+      Object.assign(state, initial());
+    }
   }
   return {
     state,

@@ -1342,7 +1342,7 @@ progress:indeterminate {
 }
 .dialog::backdrop {
   background: #00000080;
-  backdrop-filter: blur(5px);
+  /* A dim overlay avoids full-page blur compositing while posters load. */
 }
 .dialog-wide {
   max-width: 780px;

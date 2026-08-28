@@ -9,6 +9,8 @@ export async function handleCatalog(req, res) {
     // No config/API-key dependency: even old Trakt caches with expired keys still work.
     const cached = decodeStored(await redis.get(id));
     if (!Array.isArray(cached)) return res.json({ metas: [] });
+    // UI previews are bounded; addon pagination/full-list behavior stays unchanged.
+    if (req.query.preview === '1') return res.json({ metas: cached.slice(0, 12) });
     if (extra) {
       const value = new URLSearchParams(extra).get('skip');
       if (value !== null) {
