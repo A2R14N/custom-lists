@@ -30,10 +30,13 @@ async function submitList() {
     const settings = {
       mdblistApiKey: state.mdblistApiKey,
       tmdbAccessToken: state.tmdbAccessToken,
+      wetrakrApiKey: state.wetrakrApiKey,
       cacheBuster: state.cacheBuster,
     };
     if (detectedProvider.value === "mdblist")
       settings.mdblistApiKey = providerKey.value.trim();
+    else if (detectedProvider.value === "wetrakr-api")
+      settings.wetrakrApiKey = providerKey.value.trim();
     else settings.tmdbAccessToken = providerKey.value.trim();
     if (!(await library.saveSettings(settings))) return;
   }
@@ -45,7 +48,7 @@ async function submitList() {
   <form @submit.prevent="submitList">
     <div class="source-choice" aria-label="List source">
       <button
-        v-for="provider in ['mdblist', 'tmdb', 'trakt'] as const"
+        v-for="provider in ['mdblist', 'tmdb', 'wetrakr-api', 'trakt'] as const"
         :key="provider"
         type="button"
         :class="{ selected: detectedProvider === provider }"
@@ -65,9 +68,11 @@ async function submitList() {
         :placeholder="
           providerHint === 'tmdb'
             ? 'https://www.themoviedb.org/list/…'
-            : providerHint === 'trakt'
-              ? 'https://trakt.tv/users/…/lists/…'
-              : 'https://mdblist.com/lists/…/…'
+            : providerHint === 'wetrakr-api'
+              ? 'https://wetrakr.com/lists/…'
+              : providerHint === 'trakt'
+                ? 'https://trakt.tv/users/…/lists/…'
+                : 'https://mdblist.com/lists/…/…'
         "
         autocomplete="off"
         spellcheck="false"
@@ -88,11 +93,17 @@ async function submitList() {
         {{
           detectedProvider === "mdblist"
             ? "Add your MDBList API key. We’ll save it for your next import."
-            : "Add your TMDB API Read Access Token—the long token, not the v3 API key."
+            : detectedProvider === "wetrakr-api"
+              ? "Add your WeTrakr app key (client ID) to import public lists. We’ll save it for your next import."
+              : "Add your TMDB API Read Access Token—the long token, not the v3 API key."
         }}
       </p>
       <label class="field-label" for="provider-key">{{
-        detectedProvider === "mdblist" ? "MDBList API key" : "TMDB Read Access Token"
+        detectedProvider === "mdblist"
+          ? "MDBList API key"
+          : detectedProvider === "wetrakr-api"
+            ? "WeTrakr app key"
+            : "TMDB Read Access Token"
       }}</label
       ><input
         id="provider-key"
@@ -105,13 +116,18 @@ async function submitList() {
         :href="
           detectedProvider === 'mdblist'
             ? 'https://mdblist.com/preferences/#api'
-            : 'https://www.themoviedb.org/settings/api'
+            : detectedProvider === 'wetrakr-api'
+              ? 'https://wetrakr.com/profile/settings/api'
+              : 'https://www.themoviedb.org/settings/api'
         "
         target="_blank"
         rel="noopener noreferrer"
         >Where do I find this?<AppIcon name="external" :size="13"
       /></a>
     </div>
+    <p v-if="detectedProvider === 'wetrakr-api'" class="field-hint">
+      Public lists only. For private lists, use the WeTrakr ZIP / CSV import below.
+    </p>
     <div v-if="detectedProvider === 'trakt'" class="alert alert-info">
       <AppIcon name="archive" /><span
         >Trakt links can reconnect a snapshot already in your database. They won’t fetch

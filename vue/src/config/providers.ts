@@ -4,7 +4,8 @@ export const providerNames: Record<Provider, string> = {
   mdblist: "MDBList",
   tmdb: "TMDB",
   trakt: "Trakt archive",
-  wetrakr: "WeTrakr",
+  wetrakr: "WeTrakr export",
+  "wetrakr-api": "WeTrakr API",
   imdb: "IMDb",
 };
 

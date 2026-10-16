@@ -63,6 +63,14 @@ export async function advanceImport(redis, id, expectedStep) {
       throw new Error("The list was removed from this configuration.");
     const page = await fetchProviderPage(job.list, config, job.position);
     if (
+      job.list.provider === "wetrakr-api" &&
+      job.total !== null &&
+      job.total !== page.total
+    )
+      throw new Error(
+        "WeTrakr returned a changed list during import. Start a new refresh; the previous snapshot is unchanged.",
+      );
+    if (
       page.items.length > 1000 ||
       job.processed + page.items.length > MAX_ITEMS ||
       job.step >= 1000
@@ -72,6 +80,7 @@ export async function advanceImport(redis, id, expectedStep) {
       );
     }
     const metas = await resolvePage(job.list, config, page.items);
+    const previousCount = job.metas.length;
     const known = new Set(job.metas.map((meta) => `${meta.type}:${meta.id}`));
     for (const meta of metas) {
       const identity = `${meta.type}:${meta.id}`;
@@ -81,7 +90,7 @@ export async function advanceImport(redis, id, expectedStep) {
       }
     }
     job.processed += page.items.length;
-    job.skipped += page.items.length - metas.length;
+    job.skipped += page.items.length - (job.metas.length - previousCount);
     job.total = Number.isFinite(page.total) ? page.total : null;
     job.position = page.next;
     job.step++;

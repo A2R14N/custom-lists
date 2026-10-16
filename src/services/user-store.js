@@ -73,6 +73,7 @@ export function mergeConfig(previous, body) {
   for (const field of [
     "mdblistApiKey",
     "tmdbAccessToken",
+    "wetrakrApiKey",
     "traktClientId",
     "cacheBuster",
   ]) {
@@ -113,6 +114,7 @@ export async function configForUi(redis, creds, userId) {
     lists,
     mdblistApiKey: config.mdblistApiKey || "",
     tmdbAccessToken: config.tmdbAccessToken || "",
+    wetrakrApiKey: config.wetrakrApiKey || "",
     traktClientId: config.traktClientId || "",
     cacheBuster: config.cacheBuster || "",
   };

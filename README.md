@@ -2,7 +2,7 @@
 
 <img src="vue/public/brand/custom-lists-icon-v1.png" alt="Custom Lists logo" width="80" height="80" />
 
-Bring your movie and series lists into Stremio and Nuvio. Import public MDBList and TMDB lists, or upload WeTrakr and IMDb exports. Your collection lives in your own Upstash Redis database.
+Bring your movie and series lists into Stremio and Nuvio. Import public MDBList, TMDB and WeTrakr lists, or upload WeTrakr and IMDb exports. Your collection lives in your own Upstash Redis database.
 
 **[Open Custom Lists](https://stremio-custom-lists.vercel.app) · [Usage guide](docs/usage.md) · [Development](docs/development.md) · [Architecture](docs/architecture.md)**
 
@@ -16,13 +16,14 @@ This addon provides catalogs, not playback streams. Existing Trakt snapshots rem
 
 ## Supported sources
 
-| Source        | Import method                        | Credentials           |
-| ------------- | ------------------------------------ | --------------------- |
-| MDBList       | Public list URL                      | MDBList API key       |
-| TMDB          | Public list URL                      | API Read Access Token |
-| WeTrakr       | ZIP or CSV export                    | None                  |
-| IMDb          | CSV export                           | None                  |
-| Trakt archive | Reattach an existing cached snapshot | None                  |
+| Source        | Import method                        | Credentials            |
+| ------------- | ------------------------------------ | ---------------------- |
+| MDBList       | Public list URL                      | MDBList API key        |
+| TMDB          | Public list URL                      | API Read Access Token  |
+| WeTrakr API   | Public list URL                      | Your own app/client ID |
+| WeTrakr       | ZIP or CSV export                    | None                   |
+| IMDb          | CSV export                           | None                   |
+| Trakt archive | Reattach an existing cached snapshot | None                   |
 
 Search, filter, preview, rename, categorize, and reorder lists in the workspace. Sorting the workspace does not change addon order. Refreshes are manual; a failed refresh keeps the previous snapshot.
 

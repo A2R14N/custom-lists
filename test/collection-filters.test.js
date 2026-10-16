@@ -98,6 +98,7 @@ test("source counts track list changes independently of active search", () => {
     tmdb: 1,
     trakt: 1,
     wetrakr: 0,
+    "wetrakr-api": 0,
     imdb: 0,
   });
   view.state.lists.pop();

@@ -19,9 +19,9 @@ import AppIcon from "./AppIcon.vue";
       <div>
         <h3>Bring a list. Keep a snapshot.</h3>
         <p>
-          Paste a public MDBList or TMDB link and add that provider’s key when asked. Keep
-          the page open during import. Existing Trakt snapshots stay readable without a
-          Trakt subscription.
+          Paste a public MDBList, TMDB or WeTrakr link and add that provider’s key when
+          asked. Keep the page open during import. Existing Trakt snapshots stay readable
+          without a Trakt subscription.
         </p>
       </div>
     </section>

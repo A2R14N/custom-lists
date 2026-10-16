@@ -1,4 +1,4 @@
-export type Provider = "mdblist" | "tmdb" | "trakt" | "wetrakr" | "imdb";
+export type Provider = "mdblist" | "tmdb" | "trakt" | "wetrakr" | "wetrakr-api" | "imdb";
 export interface ExportItem {
   title: string;
   year: string;
@@ -50,6 +50,7 @@ export interface Catalog extends ListDefinition {
 export interface Settings {
   mdblistApiKey: string;
   tmdbAccessToken: string;
+  wetrakrApiKey: string;
   cacheBuster: string;
 }
 export interface CatalogState extends Settings {

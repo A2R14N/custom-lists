@@ -241,7 +241,8 @@
 .provider-dot.tmdb {
   background: var(--success);
 }
-.provider-dot.wetrakr {
+.provider-dot.wetrakr,
+.provider-dot.wetrakr-api {
   background: #db9a55;
 }
 .wetrakr-logo {

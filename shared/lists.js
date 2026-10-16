@@ -16,7 +16,7 @@ const mdbSorts = new Set([
 export function normalizeList(input) {
   if (!input || typeof input !== "object") throw new Error("Invalid list.");
   const provider = input.provider || "trakt";
-  if (!["trakt", "mdblist", "tmdb", "wetrakr", "imdb"].includes(provider))
+  if (!["trakt", "mdblist", "tmdb", "wetrakr", "wetrakr-api", "imdb"].includes(provider))
     throw new Error("Unsupported list provider.");
   const listId = String(input.listId || "").trim();
   const username = String(input.username || "").trim();
@@ -41,13 +41,15 @@ export function normalizeList(input) {
     throw new Error(
       "Use letters, numbers, spaces, underscores or dashes for the category.",
     );
-  const standalone = ["tmdb", "wetrakr", "imdb"].includes(provider);
+  const standalone = ["tmdb", "wetrakr", "wetrakr-api", "imdb"].includes(provider);
   if (!slug.test(listId) || (!standalone && !slug.test(username)))
     throw new Error("Invalid list ID or username.");
   if (["wetrakr", "imdb"].includes(provider) && !/^[a-f0-9]{64}$/.test(listId))
     throw new Error("Invalid list export ID.");
   if (provider === "tmdb" && !/^\d+$/.test(listId))
     throw new Error("TMDB list IDs must be numeric.");
+  if (provider === "wetrakr-api" && !/^[1-9]\d{0,14}$/.test(listId))
+    throw new Error("Invalid list ID: WeTrakr API list IDs must be positive numbers.");
   const sort = String(input.sort || "").trim();
   if (provider === "trakt" && sort && !/^[a-zA-Z0-9_,.:-]{1,100}$/.test(sort))
     throw new Error("Invalid legacy sort.");
@@ -69,7 +71,7 @@ export function normalizeList(input) {
 
 export function catalogId(input) {
   const list = normalizeList(input);
-  if (["tmdb", "wetrakr", "imdb"].includes(list.provider))
+  if (["tmdb", "wetrakr", "wetrakr-api", "imdb"].includes(list.provider))
     return `${list.provider}:${list.listId}`;
   return `${list.provider}:${list.username}:${list.listId}${list.sort ? `:${list.sort}${list.provider === "mdblist" ? `:${list.order}` : ""}` : ""}`;
 }
@@ -81,9 +83,11 @@ export function listLabel(list) {
       ? "IMDb export"
       : list.provider === "wetrakr"
         ? "WeTrakr export"
-        : list.provider === "tmdb"
-          ? `TMDB list ${list.listId}`
-          : `${list.username} / ${list.listId}`)
+        : list.provider === "wetrakr-api"
+          ? `WeTrakr list ${list.listId}`
+          : list.provider === "tmdb"
+            ? `TMDB list ${list.listId}`
+            : `${list.username} / ${list.listId}`)
   );
 }
 
@@ -98,6 +102,17 @@ export function parseListUrl(value, categoryName = "movie", name = "") {
     throw new Error("Use a public list URL.");
   const host = url.hostname.toLowerCase().replace(/^www\./, "");
   let match;
+  if (
+    host === "wetrakr.com" &&
+    (match = url.pathname.match(/^\/lists\/([1-9]\d{0,14})\/?$/))
+  ) {
+    return normalizeList({
+      provider: "wetrakr-api",
+      listId: match[1],
+      categoryName,
+      name,
+    });
+  }
   if (
     host === "themoviedb.org" &&
     (match = url.pathname.match(/^\/list\/(\d+)(?:-[^/]*)?\/?$/))
@@ -144,7 +159,7 @@ export function parseListUrl(value, categoryName = "movie", name = "") {
     });
   }
   throw new Error(
-    "Use a MDBList list URL or a TMDB /list/ URL. Trakt links can reattach existing snapshots only.",
+    "Use a MDBList, TMDB or WeTrakr list URL. Trakt links can reattach existing snapshots only.",
   );
 }
 
@@ -152,7 +167,7 @@ export function isCatalogId(id) {
   if (typeof id !== "string" || id.length > 450) return false;
   const [provider, username, listId, ...sort] = id.split(":");
   try {
-    const list = ["tmdb", "wetrakr", "imdb"].includes(provider)
+    const list = ["tmdb", "wetrakr", "wetrakr-api", "imdb"].includes(provider)
       ? { provider, listId: username }
       : {
           provider,

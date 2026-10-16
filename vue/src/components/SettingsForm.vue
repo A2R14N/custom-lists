@@ -8,6 +8,7 @@ const { state, busy } = props.library;
 const drafts = reactive<Settings>({
   mdblistApiKey: state.mdblistApiKey,
   tmdbAccessToken: state.tmdbAccessToken,
+  wetrakrApiKey: state.wetrakrApiKey,
   cacheBuster: state.cacheBuster,
 });
 const databaseName = computed(() => new URL(state.upstashUrl).hostname);
@@ -61,6 +62,24 @@ async function saveSettings() {
       placeholder="Optional · the long bearer token"
       :disabled="busy"
     />
+    <label class="field-label" for="settings-wetrakr"
+      >WeTrakr app key<a
+        href="https://wetrakr.com/profile/settings/api"
+        target="_blank"
+        rel="noopener noreferrer"
+        >API settings<AppIcon name="external" :size="12" /></a></label
+    ><input
+      id="settings-wetrakr"
+      v-model="drafts.wetrakrApiKey"
+      type="password"
+      autocomplete="off"
+      placeholder="Optional · for public WeTrakr lists"
+      :disabled="busy"
+    />
+    <p class="field-hint">
+      Use your registered application's client ID. Private lists can still be imported
+      from ZIP / CSV.
+    </p>
     <details class="advanced-settings">
       <summary>Advanced settings<AppIcon name="down" :size="15" /></summary>
       <label class="field-label" for="revision">Install link revision</label

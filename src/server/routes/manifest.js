@@ -23,7 +23,7 @@ function manifest(req, lists = []) {
     version: "1.3.0",
     name: "Custom Lists",
     description:
-      "MDBList, TMDB, IMDb and WeTrakr export catalogs, plus preserved Trakt snapshots. Your configuration and cached titles live in your own Upstash Redis.",
+      "MDBList, TMDB and WeTrakr list catalogs, IMDb and WeTrakr exports, plus preserved Trakt snapshots. Your configuration and cached titles live in your own Upstash Redis.",
     catalogs,
     resources: ["catalog"],
     types: [...new Set(["movie", "series", ...catalogs.map((item) => item.type)])],

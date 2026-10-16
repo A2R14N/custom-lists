@@ -4,11 +4,11 @@
 
 All persistent data and temporary import jobs are in the requesting user's Redis:
 
-| Key                                           | Purpose                                           |
-| --------------------------------------------- | ------------------------------------------------- |
-| `stremio:config`                              | List settings and provider keys                   |
-| `trakt:…`, `mdblist:…`, `tmdb:…`, `wetrakr:…` | Full Stremio metadata snapshots, without expiry   |
-| `stremio:import:<uuid>`                       | Temporary import progress, expires after one hour |
+| Key                                                                      | Purpose                                           |
+| ------------------------------------------------------------------------ | ------------------------------------------------- |
+| `stremio:config`                                                         | List settings and provider keys                   |
+| `trakt:…`, `mdblist:…`, `tmdb:…`, `wetrakr:…`, `wetrakr-api:…`, `imdb:…` | Full Stremio metadata snapshots, without expiry   |
+| `stremio:import:<uuid>`                                                  | Temporary import progress, expires after one hour |
 
 Catalog requests only read snapshots. A miss returns an empty catalog and does not contact a list provider. Use the list's **Refresh** control to import or retry it.
 

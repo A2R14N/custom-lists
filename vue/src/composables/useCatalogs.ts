@@ -34,6 +34,7 @@ export function useCatalogs(options: CatalogOptions = {}) {
     importing: false,
     mdblistApiKey: "",
     tmdbAccessToken: "",
+    wetrakrApiKey: "",
     traktClientId: "",
     userId: "",
     cacheBuster: "",
@@ -63,7 +64,7 @@ export function useCatalogs(options: CatalogOptions = {}) {
     } catch {
       return {
         list: null,
-        error: "Paste a complete MDBList, TMDB, or saved Trakt list URL.",
+        error: "Paste a complete MDBList, TMDB, WeTrakr, or saved Trakt list URL.",
       };
     }
   });
@@ -79,7 +80,9 @@ export function useCatalogs(options: CatalogOptions = {}) {
   const canImport = (list: ListDefinition) =>
     list.provider === "mdblist"
       ? !!state.mdblistApiKey.trim()
-      : list.provider === "tmdb" && !!state.tmdbAccessToken.trim();
+      : list.provider === "wetrakr-api"
+        ? !!state.wetrakrApiKey.trim()
+        : list.provider === "tmdb" && !!state.tmdbAccessToken.trim();
   const messageOf = (error: unknown) =>
     error instanceof Error ? error.message : "Something went wrong. Please try again.";
 
@@ -128,6 +131,7 @@ export function useCatalogs(options: CatalogOptions = {}) {
       "upstashToken",
       "mdblistApiKey",
       "tmdbAccessToken",
+      "wetrakrApiKey",
       "traktClientId",
       "cacheBuster",
       "userId",
@@ -212,6 +216,7 @@ export function useCatalogs(options: CatalogOptions = {}) {
         upstashToken: state.upstashToken,
         mdblistApiKey: state.mdblistApiKey,
         tmdbAccessToken: state.tmdbAccessToken,
+        wetrakrApiKey: state.wetrakrApiKey,
         traktClientId: state.traktClientId,
         cacheBuster: state.cacheBuster,
         ...settings,

@@ -3,6 +3,7 @@
 ## Provider references and attribution
 
 - [MDBList API](https://api.mdblist.com/) and its [OpenAPI schema](https://api.mdblist.com/schema/): list pagination, IMDb identifiers and appended metadata.
+- [WeTrakr API list items](https://api.wetrakr.com/#/lists/lists-items), [required headers and pagination](https://api.wetrakr.com/#/conventions), and [changelog](https://api.wetrakr.com/#/changelog): API v1 public lists use the user's app/client ID, regular metadata pages, and `X-Pagination-*` headers. OAuth is not used; private lists remain available through exports.
 - [TMDB v4 list API](https://developer.themoviedb.org/v4/reference/list-details), [movie external IDs](https://developer.themoviedb.org/reference/movie-external-ids), [TV external IDs](https://developer.themoviedb.org/reference/tv-series-external-ids).
 - [TMDB API FAQ](https://developer.themoviedb.org/docs/faq): free noncommercial API usage requires attribution; commercial usage requires arranging the appropriate license. Public availability alone does not mean commercial use.
 

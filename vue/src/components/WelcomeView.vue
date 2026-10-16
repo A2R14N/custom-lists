@@ -65,8 +65,8 @@ const emit = defineEmits<{ connect: []; restore: [url: string]; help: [] }>();
       <span class="feature-number">02</span>
       <h3>Bring your favorites</h3>
       <p>
-        Paste an MDBList or TMDB link, or import a WeTrakr or IMDb export. Existing Trakt
-        snapshots stay available.
+        Paste an MDBList, TMDB or public WeTrakr link, or import a WeTrakr or IMDb export.
+        Existing Trakt snapshots stay available.
       </p>
     </div>
     <div>

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { fetchCinemetaMeta, getBasicMeta } from "./cinemeta.js";
+import { fetchWeTrakrPage, weTrakrMeta } from "./wetrakr-api.js";
 
 const timeout = 12000;
 export const MAX_ITEMS = 10000;
@@ -18,6 +19,8 @@ export function requireProviderKey(provider, config) {
     throw new Error("Save your MDBList API key before importing.");
   if (provider === "tmdb" && !config.tmdbAccessToken)
     throw new Error("Save your TMDB API Read Access Token before importing.");
+  if (provider === "wetrakr-api" && !config.wetrakrApiKey)
+    throw new Error("Save your WeTrakr app key before importing.");
 }
 
 export function providerError(error) {
@@ -33,7 +36,7 @@ export function providerError(error) {
   // Only expose errors produced by our validation/import code. Redis/network errors
   // can include response bodies or credential-bearing URLs.
   if (
-    /^(Save your |Trakt snapshots |Save this list |Invalid (list|sort|legacy|import|Upstash|install)|Use |Unsupported |This import|Import (expired|progress)|The list was removed|TMDB returned|MDBList returned|No usable titles)/.test(
+    /^(Save your |Trakt snapshots |Save this list |Invalid (list|sort|legacy|import|Upstash|install)|Use |Unsupported |This import|Import (expired|progress)|The list was removed|TMDB returned|MDBList returned|WeTrakr returned|No usable titles)/.test(
       error.message || "",
     )
   )
@@ -43,6 +46,7 @@ export function providerError(error) {
 
 export async function fetchProviderPage(list, config, position = {}) {
   requireProviderKey(list.provider, config);
+  if (list.provider === "wetrakr-api") return fetchWeTrakrPage(list, config, position);
   if (list.provider === "tmdb") {
     const page = position.page || 1;
     const { data } = await axios.get(`https://api.themoviedb.org/4/list/${list.listId}`, {
@@ -165,6 +169,7 @@ async function mdblistMeta(item) {
 }
 
 export async function resolvePage(list, config, items) {
+  if (list.provider === "wetrakr-api") return items.map(weTrakrMeta).filter(Boolean);
   const metas = [];
   // Each request resolves one small page; users' Redis holds resumable progress.
   for (let offset = 0; offset < items.length; offset += 10) {

@@ -5,7 +5,7 @@
 1. Open the configuration page and enter the REST URL and read/write REST token for a **dedicated Upstash Redis database**.
 2. Click **Connect & continue**. This only reads existing data; it never saves an empty configuration. Returning users can instead choose **Already have an install link?** to restore their workspace.
 3. Choose **Add a list** and paste a public list URL. The source is detected automatically. Add a display name and category if needed.
-4. The app requests a provider key only when required: your [MDBList API key](https://mdblist.com/preferences/#api) or [TMDB API Read Access Token](https://www.themoviedb.org/settings/api). TMDB uses the long bearer token, not the v3 API key. Choose **Add to my collection** and keep the page open during import.
+4. The app requests a provider key only when required: your [MDBList API key](https://mdblist.com/preferences/#api), [TMDB API Read Access Token](https://www.themoviedb.org/settings/api), or [WeTrakr app key/client ID](https://wetrakr.com/profile/settings/api). TMDB uses the long bearer token, not the v3 API key. Choose **Add to my collection** and keep the page open during import.
 5. Choose **Install addon**. Open it in Stremio, or copy the private HTTPS URL into Nuvio's addon installer.
 
 The workspace includes source filters with list counts, search by name/source/category, title previews, display-name editing, and ordering controls. Sort the workspace by addon order, name, or title count; sorting only changes the view, not the order in your addon. To change addon order, clear filters and choose **Addon order**, then use the list's up/down controls. File import buttons for WeTrakr and IMDb are also available inside **Add a list**. Provider keys and advanced install-link settings are under **Settings**. Disconnect clears credentials from this session without deleting your database.
@@ -18,11 +18,20 @@ Supported URLs include:
 - `https://mdblist.com/lists/official/list-name`
 - `https://mdblist.com/lists/username/external/12345`
 - `https://www.themoviedb.org/list/12345-list-name`
+- `https://wetrakr.com/lists/17599`
 - Old `https://trakt.tv/users/username/lists/list-name?sort=released,asc` links can reattach **already cached** snapshots. There are no new Trakt API imports.
 
 TMDB public lists support movies and television. Entries without an IMDb ID and unsupported types are skipped and counted. MDBList sort parameters supported by this UI: rank, title, released, added, score, imdbrating, imdbvotes, tmdbpopular, usort; optional `order=asc|desc`.
 
 Custom categories such as `cartoon` are preserved. Items retain their actual `movie` or `series` type. Client handling of custom categories may vary; test your target Stremio/Nuvio version.
+
+## WeTrakr API lists
+
+Paste a public WeTrakr `/lists/<numeric-id>` link under **Add a list**, then supply your own registered application key (client ID). You can also save it under **Settings**. If API-key creation is not available in your account, follow the access instructions in the [official API documentation](https://api.wetrakr.com/). The key is saved only in your Upstash configuration and sent to WeTrakr by the backend.
+
+API imports preserve the owner's pinned/manual order, support movies and shows, and report skipped unsupported items, missing IMDb IDs and duplicates. **Refresh** imports the latest list manually. Catalog browsing only reads your snapshot and needs no active WeTrakr key. Failed, incomplete, empty or oversized refreshes retain the previous snapshot.
+
+API lists use `wetrakr-api:<numeric-id>` keys. Existing ZIP/CSV lists retain `wetrakr:<sha256>` keys and their upload workflow; matching names never merge or overwrite them. Private lists and tracking lists (Watching, Planning, Watched) are not supported through this API integration; use an export instead. There is no account authorization or automatic sync.
 
 ## Cache a WeTrakr export directly
 
