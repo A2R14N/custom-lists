@@ -1,28 +1,49 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
 import AppIcon from "./AppIcon.vue";
 import type { CatalogState } from "../types/catalog";
-defineProps<{ state: CatalogState; busy: boolean }>();
+const props = defineProps<{ state: CatalogState; busy: boolean }>();
 const emit = defineEmits<{ connect: []; restore: [url: string] }>();
 const returning = ref(false),
   installUrl = ref(""),
   showToken = ref(false);
+async function chooseConnection(useLink: boolean) {
+  returning.value = useLink;
+  props.state.error = "";
+  await nextTick();
+  document.getElementById(useLink ? "restore-url" : "redis-url")?.focus();
+}
 </script>
 <template>
   <section class="connection-card" aria-labelledby="connect-heading">
-    <div class="card-eyebrow">
-      <span class="step-dot">01</span> YOUR OWN LITTLE CORNER
-    </div>
     <h2 id="connect-heading">
-      {{ returning ? "Welcome back." : "Make room for your favorites." }}
+      {{ returning ? "Welcome back" : "Connect your collection" }}
     </h2>
     <p class="connection-intro">
       {{
         returning
           ? "Paste your private install link to pick up where you left off."
-          : "Connect your storage. We’ll bring back any lists you already have."
+          : "Use your own Upstash storage to save lists and bring back your existing collection."
       }}
     </p>
+    <div class="connection-options" role="group" aria-label="How to connect">
+      <button
+        type="button"
+        :aria-pressed="!returning"
+        :disabled="busy"
+        @click="chooseConnection(false)"
+      >
+        <AppIcon name="database" :size="16" />Upstash credentials
+      </button>
+      <button
+        type="button"
+        :aria-pressed="returning"
+        :disabled="busy"
+        @click="chooseConnection(true)"
+      >
+        <AppIcon name="link" :size="16" />Existing install link
+      </button>
+    </div>
     <div v-if="state.error" class="alert alert-error" role="alert">
       <AppIcon name="help" /><span>{{ state.error }}</span>
     </div>
@@ -37,7 +58,11 @@ const returning = ref(false),
         :disabled="busy"
         required
         spellcheck="false"
+        aria-describedby="redis-url-hint"
       />
+      <p id="redis-url-hint" class="field-hint">
+        Find this in your Upstash database’s REST connection details.
+      </p>
       <label class="field-label" for="redis-token"
         >REST token <span>Read/write</span></label
       >
@@ -71,9 +96,7 @@ const returning = ref(false),
       </button>
     </form>
     <form v-else @submit.prevent="emit('restore', installUrl)">
-      <label class="field-label" for="restore-url"
-        >Your private install link</label
-      >
+      <label class="field-label" for="restore-url">Your private install link</label>
       <input
         id="restore-url"
         v-model="installUrl"
@@ -83,9 +106,7 @@ const returning = ref(false),
         :disabled="busy"
         required
       />
-      <p class="field-hint">
-        This link contains your credentials. Keep it private.
-      </p>
+      <p class="field-hint">This link contains your credentials. Keep it private.</p>
       <button
         class="button button-primary button-full connect-button"
         :disabled="busy || !installUrl"
@@ -108,8 +129,8 @@ const returning = ref(false),
       </summary>
       <div>
         <p>
-          Upstash is the personal storage space for your lists. Use a dedicated
-          database for this addon.
+          Upstash is the personal storage space for your lists. Use a dedicated database
+          for this addon.
         </p>
         <ol>
           <li>
@@ -126,19 +147,5 @@ const returning = ref(false),
         <p>Your provider’s storage and usage limits apply.</p>
       </div>
     </details>
-    <button
-      class="text-button returning-button"
-      :disabled="busy"
-      @click="
-        returning = !returning;
-        state.error = '';
-      "
-    >
-      {{
-        returning
-          ? "Connect using Upstash credentials"
-          : "Already have an install link?"
-      }}<AppIcon name="arrow" :size="15" />
-    </button>
   </section>
 </template>

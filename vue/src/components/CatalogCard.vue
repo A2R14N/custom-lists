@@ -4,11 +4,13 @@ import { listLabel } from "../../../shared/lists.js";
 import AppIcon from "./AppIcon.vue";
 import CatalogCover from "./CatalogCover.vue";
 import type { Catalog } from "../types/catalog";
+import { providerNames } from "../config/providers";
 const props = defineProps<{
   list: Catalog;
   busy: boolean;
   index: number;
   total: number;
+  reorderable?: boolean;
 }>();
 const emit = defineEmits<{
   preview: [];
@@ -16,26 +18,15 @@ const emit = defineEmits<{
   refresh: [];
   move: [direction: number];
 }>();
-const provider = computed(
-  () =>
-    ({ mdblist: "MDBList", tmdb: "TMDB", trakt: "Trakt archive", wetrakr: "WeTrakr", imdb: "IMDb" })[
-      props.list.provider
-    ],
-);
+const provider = computed(() => providerNames[props.list.provider]);
 const progress = computed(() =>
   props.list.progress?.total
-    ? Math.min(
-        100,
-        (props.list.progress.processed / props.list.progress.total) * 100,
-      )
+    ? Math.min(100, (props.list.progress.processed / props.list.progress.total) * 100)
     : null,
 );
 </script>
 <template>
-  <article
-    class="catalog-card"
-    :class="{ 'is-importing': list.status === 'importing' }"
-  >
+  <article class="catalog-card" :class="{ 'is-importing': list.status === 'importing' }">
     <button
       class="catalog-art-button"
       :disabled="!list.cached || busy"
@@ -56,9 +47,7 @@ const progress = computed(() =>
     <div class="catalog-info">
       <div class="catalog-provider">
         <span class="provider-dot" :class="list.provider"></span>{{ provider
-        }}<span v-if="list.provider === 'trakt'" class="archive-label"
-          >PRESERVED</span
-        >
+        }}<span v-if="list.provider === 'trakt'" class="archive-label">PRESERVED</span>
       </div>
       <h3>{{ listLabel(list) }}</h3>
       <div class="catalog-meta">
@@ -76,15 +65,12 @@ const progress = computed(() =>
             : "Not saved yet"
         }}</span>
       </div>
-      <p v-if="['wetrakr', 'imdb'].includes(list.provider)" class="field-hint">Saved from export · upload a new export to update</p>
-      <div
-        v-if="list.status === 'importing'"
-        class="import-state"
-        role="status"
-      >
+      <p v-if="['wetrakr', 'imdb'].includes(list.provider)" class="field-hint">
+        Saved from export · upload a new export to update
+      </p>
+      <div v-if="list.status === 'importing'" class="import-state" role="status">
         <div>
-          <span class="spinner" />Saving
-          {{ list.progress?.done || 0 }} titles<span
+          <span class="spinner" />Saving {{ list.progress?.done || 0 }} titles<span
             v-if="list.progress?.total"
           >
             of {{ list.progress.total }}</span
@@ -101,7 +87,8 @@ const progress = computed(() =>
         {{ list.error }}
       </p>
       <p v-if="list.skipped" class="field-hint">
-        {{ list.skipped }} entries were skipped (unsupported, missing IMDb ID, or duplicates).
+        {{ list.skipped }} entries were skipped (unsupported, missing IMDb ID, or
+        duplicates).
       </p>
     </div>
     <div class="catalog-actions">
@@ -110,10 +97,22 @@ const progress = computed(() =>
         class="ready-label"
         ><span></span>Ready</span
       ><button
+        v-if="list.cached"
+        class="text-button catalog-preview"
+        :disabled="busy"
+        :aria-label="`Preview titles in ${listLabel(list)}`"
+        @click="emit('preview')"
+      >
+        <AppIcon name="play" :size="14" />Preview</button
+      ><button
         v-if="list.provider !== 'trakt'"
         class="icon-button"
         :aria-label="`${['wetrakr', 'imdb'].includes(list.provider) ? 'Upload updated export for' : 'Refresh'} ${listLabel(list)}`"
-        :title="['wetrakr', 'imdb'].includes(list.provider) ? 'Upload updated export' : `Refresh ${listLabel(list)}`"
+        :title="
+          ['wetrakr', 'imdb'].includes(list.provider)
+            ? 'Upload updated export'
+            : `Refresh ${listLabel(list)}`
+        "
         :disabled="busy"
         @click="emit('refresh')"
       >
@@ -127,7 +126,7 @@ const progress = computed(() =>
       >
         <AppIcon name="settings" :size="18" />
       </button>
-      <div v-if="total > 1" class="reorder-buttons">
+      <div v-if="total > 1 && reorderable" class="reorder-buttons">
         <button
           class="icon-button"
           :aria-label="`Move ${listLabel(list)} up`"

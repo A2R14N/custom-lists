@@ -1,5 +1,0 @@
-{
-  "ignore": ["cache/**/*", "node_modules/**/*", "vue/dist/**/*", "*.log"],
-  "watch": ["index.js", "src/**/*.js", "shared/**/*.js"],
-  "ext": "js,json"
-}

@@ -12,10 +12,7 @@ withDefaults(defineProps<{ tone?: string; label?: string }>(), {
         class="cover-ridge-back"
         d="M-30 244 78 118 164 222 230 165 310 274V370H-30Z"
       />
-      <path
-        class="cover-ridge-front"
-        d="m-30 308 98-114 88 114 74-65 80 77v50H-30Z"
-      />
+      <path class="cover-ridge-front" d="m-30 308 98-114 88 114 74-65 80 77v50H-30Z" />
       <path
         class="cover-line"
         d="M-30 314h340M-30 323h340M-30 332h340"

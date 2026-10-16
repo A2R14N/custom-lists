@@ -1,0 +1,9 @@
+# Provider references
+
+## Provider references and attribution
+
+- [MDBList API](https://api.mdblist.com/) and its [OpenAPI schema](https://api.mdblist.com/schema/): list pagination, IMDb identifiers and appended metadata.
+- [TMDB v4 list API](https://developer.themoviedb.org/v4/reference/list-details), [movie external IDs](https://developer.themoviedb.org/reference/movie-external-ids), [TV external IDs](https://developer.themoviedb.org/reference/tv-series-external-ids).
+- [TMDB API FAQ](https://developer.themoviedb.org/docs/faq): free noncommercial API usage requires attribution; commercial usage requires arranging the appropriate license. Public availability alone does not mean commercial use.
+
+This product uses the TMDB API but is not endorsed or certified by TMDB. The official TMDB logo is included in the configuration page. Cinemeta is used as a metadata fallback for MDBList entries without posters.

@@ -7,15 +7,27 @@ const props = withDefaults(defineProps<{ posters?: string[]; tone?: string }>(),
   tone: "blue",
 });
 const failed = ref<string[]>([]);
-watch(() => props.posters, () => { failed.value = []; });
-const visible = computed(() => props.posters.filter(url => !failed.value.includes(url)).slice(0, 3));
+watch(
+  () => props.posters,
+  () => {
+    failed.value = [];
+  },
+);
+const visible = computed(() =>
+  props.posters.filter((url) => !failed.value.includes(url)).slice(0, 3),
+);
 function onError(url: string) {
   if (!failed.value.includes(url)) failed.value = [...failed.value, url];
 }
 </script>
 
 <template>
-  <div v-if="visible.length" class="catalog-cover" :data-count="visible.length" aria-hidden="true">
+  <div
+    v-if="visible.length"
+    class="catalog-cover"
+    :data-count="visible.length"
+    aria-hidden="true"
+  >
     <img
       v-for="(poster, index) in visible"
       :key="poster"
@@ -53,9 +65,22 @@ function onError(url: string) {
   border-radius: 3px;
   box-shadow: 0 3px 8px #00000080;
 }
-.catalog-cover img[data-slot="0"] { left: 17%; z-index: 3; }
-.catalog-cover img[data-slot="1"] { left: -12%; top: 15%; transform: rotate(-13deg); z-index: 1; }
-.catalog-cover img[data-slot="2"] { right: -12%; top: 15%; transform: rotate(13deg); z-index: 2; }
+.catalog-cover img[data-slot="0"] {
+  left: 17%;
+  z-index: 3;
+}
+.catalog-cover img[data-slot="1"] {
+  left: -12%;
+  top: 15%;
+  transform: rotate(-13deg);
+  z-index: 1;
+}
+.catalog-cover img[data-slot="2"] {
+  right: -12%;
+  top: 15%;
+  transform: rotate(13deg);
+  z-index: 2;
+}
 .catalog-cover[data-count="1"] img {
   inset: 0;
   width: 100%;
@@ -63,6 +88,12 @@ function onError(url: string) {
   border: 0;
   border-radius: inherit;
 }
-.catalog-cover[data-count="2"] img[data-slot="0"] { left: 28%; transform: rotate(6deg); }
-.catalog-cover[data-count="2"] img[data-slot="1"] { left: 1%; transform: rotate(-10deg); }
+.catalog-cover[data-count="2"] img[data-slot="0"] {
+  left: 28%;
+  transform: rotate(6deg);
+}
+.catalog-cover[data-count="2"] img[data-slot="1"] {
+  left: 1%;
+  transform: rotate(-10deg);
+}
 </style>

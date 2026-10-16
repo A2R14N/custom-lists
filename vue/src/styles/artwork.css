@@ -1,0 +1,108 @@
+.cover-art {
+  overflow: hidden;
+  position: relative;
+  background: #344b4b;
+  height: 100%;
+  width: 100%;
+  border-radius: 5px;
+}
+.cover-art > svg {
+  display: block;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  inset: 0;
+}
+.cover-sun {
+  fill: #c4d2c5;
+}
+.cover-ridge-back {
+  fill: #2a3f3d;
+}
+.cover-ridge-front {
+  fill: #1b302d;
+}
+.cover-line {
+  stroke: #657f78;
+  opacity: 0.35;
+}
+.cover-amber {
+  background: #62503b;
+}
+.cover-amber .cover-sun {
+  fill: #d4bd8c;
+}
+.cover-amber .cover-ridge-back {
+  fill: #473c2e;
+}
+.cover-amber .cover-ridge-front {
+  fill: #302a23;
+}
+.cover-amber .cover-line {
+  stroke: #877455;
+}
+.cover-green {
+  background: #3c5146;
+}
+.cover-green .cover-sun {
+  fill: #cad2ad;
+}
+.cover-green .cover-ridge-back {
+  fill: #2c4034;
+}
+.cover-green .cover-ridge-front {
+  fill: #203027;
+}
+.cover-green .cover-line {
+  stroke: #68816a;
+}
+.cover-caption {
+  position: relative;
+  z-index: 1;
+  padding: 12px 10px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #f2f2f2;
+}
+.cover-caption > span:first-child {
+  font-size: 5px;
+  letter-spacing: 1.1px;
+  font-weight: 600;
+}
+.cover-caption strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  line-height: 0.98;
+  font-weight: 400;
+  letter-spacing: -0.55px;
+  max-width: 120px;
+  text-shadow: 0 1px 12px #00000055;
+  margin-top: auto;
+  margin-bottom: 13px;
+}
+.cover-caption-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 5px;
+  letter-spacing: 0.8px;
+}
+.cover-caption-bottom > span {
+  font-size: 13px;
+}
+@media (max-width: 850px) {
+  .cover-caption strong {
+    font-size: 17px;
+  }
+  .cover-caption {
+    padding: 9px 7px;
+  }
+  .cover-caption > span:first-child {
+    font-size: 4px;
+  }
+  .cover-caption-bottom {
+    font-size: 4px;
+  }
+}

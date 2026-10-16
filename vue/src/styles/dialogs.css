@@ -1,0 +1,532 @@
+.dialog {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 0;
+  width: calc(100% - 32px);
+  max-width: 525px;
+  max-height: calc(100dvh - 64px);
+  overflow: auto;
+  color: var(--ink);
+  background: var(--surface-raised);
+  box-shadow: 0 28px 100px #00000080;
+}
+.dialog[open] {
+  animation: dialog-in 0.18s ease-out;
+}
+.dialog::backdrop {
+  background: #00000080;
+  /* A dim overlay avoids full-page blur compositing while posters load. */
+}
+.dialog-wide {
+  max-width: 780px;
+}
+.dialog-content {
+  padding: 30px;
+}
+.dialog-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 27px;
+}
+.dialog-heading h2 {
+  font-size: 26px;
+  font-weight: 550;
+  letter-spacing: -0.9px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.dialog-heading p {
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.65;
+}
+.dialog-heading > .icon-button {
+  margin-top: -6px;
+  margin-right: -8px;
+}
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 22px;
+  margin-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.dialog-footer > p {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.dialog-footer .button {
+  font-size: 11px;
+}
+.dialog-footer > .text-button {
+  font-size: 10px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 14px;
+}
+.form-row > div {
+  min-width: 0;
+}
+.source-choice {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.source-choice > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  font-size: 10px;
+  padding: 9px 5px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+.source-choice > button.selected {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.source-choice > button:disabled.selected {
+  opacity: 1;
+}
+.inline-provider-setup {
+  padding: 18px;
+  margin: 20px 0;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 9px;
+}
+.inline-provider-setup > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+}
+.inline-provider-setup strong {
+  font-size: 11px;
+  font-weight: 600;
+}
+.inline-provider-setup > p {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-top: 8px;
+}
+.inline-provider-setup > a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--accent);
+  font-size: 10px;
+  margin-top: 11px;
+}
+.inline-provider-setup .field-label {
+  font-size: 10px;
+  margin-top: 15px;
+}
+.advanced-toggle {
+  font-size: 9px;
+  color: var(--muted);
+  display: flex;
+  margin-top: 12px;
+  margin-left: auto;
+}
+.settings-connection {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: var(--surface);
+  border: 1px solid var(--success-border);
+  border-radius: 9px;
+  padding: 16px;
+}
+.settings-connection .panel-icon {
+  margin: 0;
+  flex-shrink: 0;
+  color: var(--success);
+  border-color: var(--success-border);
+}
+.settings-connection > div {
+  min-width: 0;
+  flex: 1;
+}
+.settings-connection strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+}
+.settings-connection small {
+  display: block;
+  font-size: 9px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 3px;
+}
+.status-tag {
+  font-size: 8px;
+  padding: 3px 6px;
+  color: var(--success);
+  border: 1px solid var(--success-border);
+  border-radius: 4px;
+  background: var(--success-soft);
+}
+.settings-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 23px 0;
+}
+.advanced-settings {
+  margin-top: 23px;
+  border-top: 1px solid var(--line);
+  padding-top: 17px;
+}
+.advanced-settings > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+.advanced-settings summary::-webkit-details-marker {
+  display: none;
+}
+.advanced-settings[open] > summary svg {
+  transform: rotate(180deg);
+}
+.removal-summary {
+  text-align: center;
+  padding: 10px 20px;
+}
+.removal-summary > svg {
+  color: var(--warning);
+  margin-bottom: 18px;
+}
+.removal-summary strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.removal-summary p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-top: 13px;
+}
+
+.install-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--success-border);
+  background: var(--success-soft);
+  border-radius: 10px;
+  margin-bottom: 22px;
+}
+.summary-mark {
+  width: 37px;
+  height: 37px;
+  border-radius: 50%;
+  background: var(--success-soft);
+  display: grid;
+  place-items: center;
+  color: var(--success);
+}
+.install-summary strong {
+  font-size: 13px;
+  font-weight: 550;
+}
+.install-summary p {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.install-app-button {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 16px;
+  width: 100%;
+  text-align: left;
+  margin: 11px 0;
+}
+.install-app-button:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-hover);
+}
+.app-symbol {
+  height: 39px;
+  width: 39px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.stremio-symbol {
+  background: #272727;
+  color: #afafaf;
+}
+.nuvio-symbol {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1;
+  font-family: Georgia, serif;
+}
+.install-app-button > span:nth-child(2) {
+  flex: 1;
+}
+.install-app-button strong {
+  font-size: 12px;
+  display: block;
+  font-weight: 550;
+}
+.install-app-button small {
+  font-size: 10px;
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.install-app-button > svg {
+  color: var(--subtle);
+}
+.private-link-box {
+  padding-top: 12px;
+}
+.private-link-box .field-label > .text-button {
+  font-size: 10px;
+  color: var(--accent);
+}
+.private-link-box input {
+  font-size: 11px;
+  background: var(--input);
+  color: var(--muted);
+  font-family: ui-monospace, monospace;
+}
+.privacy-warning {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--warning);
+  background: var(--warning-soft);
+  border: 1px solid var(--warning-border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 21px;
+}
+.privacy-warning > svg {
+  margin-top: 1px;
+  flex-shrink: 0;
+  width: 17px;
+}
+.privacy-warning p {
+  line-height: 1.75;
+  color: var(--muted);
+}
+.privacy-warning strong {
+  font-weight: 600;
+  color: var(--warning);
+}
+.poster-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px 14px;
+}
+.poster-grid img {
+  width: 100%;
+  aspect-ratio: 2/3;
+  border-radius: 7px;
+  object-fit: cover;
+  background: var(--surface-raised);
+}
+.poster-fallback {
+  width: 100%;
+  aspect-ratio: 2/3;
+  border-radius: 7px;
+  object-fit: cover;
+  background: var(--surface-raised);
+}
+.poster-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--subtle);
+}
+.poster-grid h3 {
+  font-size: 11px;
+  line-height: 1.45;
+  margin-top: 8px;
+  font-weight: 550;
+}
+.poster-grid p {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.preview-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 80px 20px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.preview-caption {
+  justify-content: center;
+  margin-top: 23px;
+}
+.help-content section {
+  display: flex;
+  gap: 17px;
+  margin-bottom: 25px;
+}
+.help-content section > span {
+  height: 28px;
+  width: 28px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 9px;
+}
+.help-content h3 {
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.5;
+  margin-bottom: 7px;
+}
+.help-content section p {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+@media (max-width: 700px) {
+  .dialog {
+    max-height: calc(100dvh - 32px);
+    border-radius: 13px;
+  }
+  .dialog-content {
+    padding: 24px;
+  }
+  .dialog-heading h2 {
+    font-size: 25px;
+  }
+  .dialog-heading p {
+    font-size: 11px;
+  }
+  .dialog-heading {
+    margin-bottom: 23px;
+  }
+  .dialog-footer {
+    flex-wrap: wrap;
+    gap: 17px;
+  }
+  .dialog-footer > .button {
+    flex: 1;
+  }
+  .dialog-footer > p {
+    width: 100%;
+    font-size: 9px;
+    justify-content: center;
+    order: 1;
+  }
+  .form-row {
+    gap: 12px;
+  }
+  .source-choice > button {
+    font-size: 9px;
+  }
+  .poster-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 17px 10px;
+  }
+  .poster-grid h3 {
+    font-size: 10px;
+  }
+  .settings-connection {
+    padding: 13px;
+    gap: 10px;
+  }
+  .settings-connection small {
+    font-size: 8px;
+  }
+  .install-app-button strong {
+    font-size: 12px;
+  }
+  .install-app-button small {
+    font-size: 9px;
+  }
+  .dialog-footer > .text-button {
+    font-size: 10px;
+  }
+  .privacy-warning {
+    padding: 12px;
+  }
+}
+@media (max-width: 700px) {
+  .private-link-box input {
+    font-size: 16px;
+  }
+  .privacy-warning p {
+    font-size: 12px;
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 380px) {
+  .dialog-content {
+    padding: 20px;
+  }
+}
+.file-import-options {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  margin-top: 22px;
+}
+.file-import-options h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.file-import-options p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 6px 0 12px;
+}
+.file-import-options > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.preview-error .button {
+  margin-top: 12px;
+}
+.dialog-heading p {
+  font-size: 12px;
+}
+.privacy-warning p {
+  font-size: 12px;
+}

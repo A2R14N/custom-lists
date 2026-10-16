@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "installCommand": "npm ci",
-  "buildCommand": "npm test && npm --prefix vue ci && npm --prefix vue run build",
+  "buildCommand": "npm --prefix vue ci && npm test && npm run build",
   "outputDirectory": "vue/dist",
   "functions": {
     "api/index.js": {
@@ -11,13 +11,15 @@
       "excludeFiles": "{test/**,**/.env,**/.env.*,**/*.log}"
     }
   },
-  "headers": [{
-    "source": "/(.*)",
-    "headers": [
-      { "key": "Cache-Control", "value": "private, no-store" },
-      { "key": "Referrer-Policy", "value": "no-referrer" },
-      { "key": "X-Content-Type-Options", "value": "nosniff" }
-    ]
-  }],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, no-store" },
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ],
   "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }]
 }

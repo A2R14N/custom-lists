@@ -1,0 +1,8 @@
+node_modules/
+vue/node_modules/
+vue/dist/
+.work/
+.vercel/
+coverage/
+package-lock.json
+vue/package-lock.json

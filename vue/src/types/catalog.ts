@@ -74,7 +74,9 @@ export interface SavedConfig extends Settings {
   upstashToken: string;
   traktClientId?: string;
   userId: string;
-  lists: Array<ListDefinition & { cached?: boolean; itemCount?: number; coverPosters?: string[] }>;
+  lists: Array<
+    ListDefinition & { cached?: boolean; itemCount?: number; coverPosters?: string[] }
+  >;
 }
 export interface Meta {
   id: string;

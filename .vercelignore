@@ -13,3 +13,5 @@ vue/dist
 .codex
 .agents
 .commit_msg.txt
+docs
+.github

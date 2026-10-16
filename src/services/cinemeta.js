@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 /**
  * Fetch metadata from Cinemeta API
@@ -9,12 +9,12 @@ import axios from 'axios';
  */
 export async function fetchCinemetaMeta(imdbId, type, fallbackTitle = null) {
   // Normalize type to cinemeta format
-  const cinemetaType = type === 'MOVIE' || type === 'movie' ? 'movie' : 'series';
+  const cinemetaType = type === "MOVIE" || type === "movie" ? "movie" : "series";
 
   try {
     const cinemetaResponse = await axios.get(
       `https://v3-cinemeta.strem.io/meta/${cinemetaType}/${imdbId}.json`,
-      { timeout: 5000, validateStatus: (status) => status < 500 } // Don't throw on 404
+      { timeout: 5000, validateStatus: (status) => status < 500 }, // Don't throw on 404
     );
 
     if (cinemetaResponse.status === 200 && cinemetaResponse.data?.meta) {
@@ -26,13 +26,13 @@ export async function fetchCinemetaMeta(imdbId, type, fallbackTitle = null) {
         poster: rawMeta.poster,
         description: rawMeta.description,
         releaseInfo: rawMeta.releaseInfo,
-        posterShape: rawMeta.posterShape || 'poster'
+        posterShape: rawMeta.posterShape || "poster",
       };
     }
   } catch (error) {
     // If cinemeta fails (network error, timeout, etc), return null
     // 404s are handled by validateStatus above
-    if (error.code !== 'ECONNABORTED' && error.response?.status !== 404) {
+    if (error.code !== "ECONNABORTED" && error.response?.status !== 404) {
       console.log(`Cinemeta fetch failed for ${imdbId}:`, error.message);
     }
   }
@@ -51,9 +51,8 @@ export function getBasicMeta(imdbId, title, type) {
   return {
     id: imdbId,
     name: title,
-    type: type === 'MOVIE' || type === 'movie' ? 'movie' : 'series',
+    type: type === "MOVIE" || type === "movie" ? "movie" : "series",
     poster: `https://live.metahub.space/poster/medium/${imdbId}/img`,
-    posterShape: 'poster',
+    posterShape: "poster",
   };
 }
-

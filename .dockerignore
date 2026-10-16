@@ -10,6 +10,10 @@ vue/dist
 .gitignore
 README.md
 .cursorrules
+.work
+.codex
+.agents
+.github
 
 .env.local
 .env.development

@@ -16,6 +16,14 @@ async function sync() {
   if (!props.open && dialog.value?.open) dialog.value.close();
 }
 watch(() => props.open, sync);
+watch(
+  () => props.title,
+  async () => {
+    await nextTick();
+    if (props.open && dialog.value?.open)
+      dialog.value.querySelector<HTMLElement>("#dialog-title")?.focus();
+  },
+);
 onMounted(sync);
 function dismiss() {
   if (!props.busy) emit("close");
@@ -39,7 +47,7 @@ function dismiss() {
     <div class="dialog-content">
       <header class="dialog-heading">
         <div>
-          <h2 id="dialog-title">{{ title }}</h2>
+          <h2 id="dialog-title" tabindex="-1">{{ title }}</h2>
           <p v-if="description" id="dialog-description">{{ description }}</p>
         </div>
         <button

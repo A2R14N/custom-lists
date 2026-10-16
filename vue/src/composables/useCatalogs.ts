@@ -16,7 +16,15 @@ import type {
   ExportList,
 } from "../types/catalog";
 
-export function useCatalogs() {
+interface CatalogOptions {
+  fetch?: typeof fetch;
+  appUrl?: string;
+}
+
+export type CatalogLibrary = ReturnType<typeof useCatalogs>;
+
+export function useCatalogs(options: CatalogOptions = {}) {
+  const fetchRequest = options.fetch ?? fetch;
   const initial = (): CatalogState => ({
     upstashUrl: "",
     upstashToken: "",
@@ -40,29 +48,25 @@ export function useCatalogs() {
   // Session-only previews: bounded, short-lived, and cleared when snapshots change.
   const previews = new Map<string, { expires: number; data: Promise<Meta[]> }>();
   const state = reactive<CatalogState>(initial());
-  const busy = computed(
-    () => state.connecting || state.saving || state.importing,
-  );
-  const parsed = computed<{ list: ListDefinition | null; error: string }>(
-    () => {
-      if (!state.listUrl.trim()) return { list: null, error: "" };
-      try {
-        return {
-          list: parseListUrl(
-            state.listUrl,
-            state.category,
-            state.listName,
-          ) as ListDefinition,
-          error: "",
-        };
-      } catch {
-        return {
-          list: null,
-          error: "Paste a complete MDBList, TMDB, or saved Trakt list URL.",
-        };
-      }
-    },
-  );
+  const busy = computed(() => state.connecting || state.saving || state.importing);
+  const parsed = computed<{ list: ListDefinition | null; error: string }>(() => {
+    if (!state.listUrl.trim()) return { list: null, error: "" };
+    try {
+      return {
+        list: parseListUrl(
+          state.listUrl,
+          state.category,
+          state.listName,
+        ) as ListDefinition,
+        error: "",
+      };
+    } catch {
+      return {
+        list: null,
+        error: "Paste a complete MDBList, TMDB, or saved Trakt list URL.",
+      };
+    }
+  });
   const titleCount = computed(() => {
     const seen = new Set<string>();
     return state.lists.reduce((count, list) => {
@@ -77,14 +81,12 @@ export function useCatalogs() {
       ? !!state.mdblistApiKey.trim()
       : list.provider === "tmdb" && !!state.tmdbAccessToken.trim();
   const messageOf = (error: unknown) =>
-    error instanceof Error
-      ? error.message
-      : "Something went wrong. Please try again.";
+    error instanceof Error ? error.message : "Something went wrong. Please try again.";
 
   async function request<T>(url: string, body?: unknown): Promise<T> {
     let response: Response;
     try {
-      response = await fetch(url, {
+      response = await fetchRequest(url, {
         ...(body === undefined
           ? {}
           : {
@@ -104,9 +106,7 @@ export function useCatalogs() {
     try {
       data = await response.json();
     } catch {
-      throw new Error(
-        "The server returned an unexpected response. Please try again.",
-      );
+      throw new Error("The server returned an unexpected response. Please try again.");
     }
     if (!response.ok)
       throw new Error(data.error || "The request could not be completed.");
@@ -188,9 +188,7 @@ export function useCatalogs() {
   async function restoreFromUrl(value: string) {
     try {
       const url = new URL(value.trim().replace(/^stremio:\/\//i, "https://"));
-      const match = url.pathname.match(
-        /^\/([^/]+)\/(?:manifest\.json|configure)\/?$/,
-      );
+      const match = url.pathname.match(/^\/([^/]+)\/(?:manifest\.json|configure)\/?$/);
       if (
         !["https:", "http:"].includes(url.protocol) ||
         !match ||
@@ -201,8 +199,7 @@ export function useCatalogs() {
       // Only extract the identifier. Never send credentials to the pasted host.
       return await restore(match[1]);
     } catch {
-      state.error =
-        "Paste your complete private install link, ending in /manifest.json.";
+      state.error = "Paste your complete private install link, ending in /manifest.json.";
       return false;
     }
   }
@@ -259,8 +256,7 @@ export function useCatalogs() {
     if (
       state.lists.some(
         (item) =>
-          catalogId(item) === catalogId(list) &&
-          item.categoryName === list.categoryName,
+          catalogId(item) === catalogId(list) && item.categoryName === list.categoryName,
       )
     ) {
       state.error = "This list is already in that category.";
@@ -277,9 +273,7 @@ export function useCatalogs() {
     if (list.provider === "trakt") {
       try {
         const data = await request<SavedConfig>(`/api/config/${state.userId}`);
-        const saved = data.lists.find(
-          (item) => catalogId(item) === catalogId(list),
-        );
+        const saved = data.lists.find((item) => catalogId(item) === catalogId(list));
         list.cached = !!saved?.cached;
         list.itemCount = saved?.itemCount || 0;
         list.coverPosters = saved?.coverPosters || [];
@@ -303,10 +297,9 @@ export function useCatalogs() {
     list.error = "";
     list.skipped = 0;
     try {
-      let progress = await request<ImportProgress>(
-        `/api/cache/${state.userId}`,
-        { list: normalizeList(list) },
-      );
+      let progress = await request<ImportProgress>(`/api/cache/${state.userId}`, {
+        list: normalizeList(list),
+      });
       list.progress = progress;
       while (progress.status !== "done") {
         progress = await request<ImportProgress>(
@@ -364,24 +357,36 @@ export function useCatalogs() {
     state.error = "";
     state.message = "";
     try {
-      const result = await request<{ list: SavedConfig["lists"][number]; skipped: number }>(
-        `/api/exports/${state.userId}`,
-        { provider: list.provider || "wetrakr", sourceName: list.sourceName, categoryName, items: list.items },
-      );
+      const result = await request<{
+        list: SavedConfig["lists"][number];
+        skipped: number;
+      }>(`/api/exports/${state.userId}`, {
+        provider: list.provider || "wetrakr",
+        sourceName: list.sourceName,
+        categoryName,
+        items: list.items,
+      });
       previews.clear();
       const key = catalogId(result.list);
-      const existing = state.lists.filter(item => catalogId(item) === key);
-      const status = { cached: true, itemCount: result.list.itemCount || 0,
-        coverPosters: result.list.coverPosters || [], skipped: result.skipped,
-        error: "", status: "idle" as const };
-      if (existing.length) existing.forEach(item => Object.assign(item, status));
+      const existing = state.lists.filter((item) => catalogId(item) === key);
+      const status = {
+        cached: true,
+        itemCount: result.list.itemCount || 0,
+        coverPosters: result.list.coverPosters || [],
+        skipped: result.skipped,
+        error: "",
+        status: "idle" as const,
+      };
+      if (existing.length) existing.forEach((item) => Object.assign(item, status));
       else state.lists.push({ ...normalizeList(result.list), ...status } as Catalog);
       state.addonUrl = buildAddonUrl();
       return true;
     } catch (error) {
       state.error = messageOf(error);
       return false;
-    } finally { state.importing = false; }
+    } finally {
+      state.importing = false;
+    }
   }
 
   async function moveList(list: Catalog, direction: number) {
@@ -418,13 +423,13 @@ export function useCatalogs() {
       if (previews.size >= 20) previews.delete(previews.keys().next().value!);
       const data = request<{ metas: Meta[] }>(
         `/${state.userId}/catalog/${encodeURIComponent(list.categoryName)}/${encodeURIComponent(catalogId(list))}/skip=0.json?preview=1`,
-      ).then(result => result.metas.slice(0, 12));
+      ).then((result) => result.metas.slice(0, 12));
       entry = { expires: Date.now() + 60000, data };
       previews.set(key, entry);
     }
     try {
       // Broken-image handling in the dialog must not mutate the cached preview.
-      return (await entry.data).map(meta => ({ ...meta }));
+      return (await entry.data).map((meta) => ({ ...meta }));
     } catch (error) {
       if (previews.get(key) === entry) previews.delete(key);
       throw error;
@@ -432,7 +437,9 @@ export function useCatalogs() {
   }
   function buildAddonUrl() {
     const base = (
-      import.meta.env.VITE_APP_URL || window.location.origin
+      options.appUrl ||
+      import.meta.env?.VITE_APP_URL ||
+      window.location.origin
     ).replace(/\/$/, "");
     const revision = state.cacheBuster.trim()
       ? `~${encodeURIComponent(state.cacheBuster.trim())}`
