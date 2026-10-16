@@ -22,6 +22,7 @@ docs/nuvio-compatibility.md
 *.tgz
 
 # Editors and operating systems
+.vscode/
 .idea/
 .DS_Store
 Thumbs.db

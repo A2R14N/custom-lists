@@ -2,7 +2,7 @@
 
 ## Local development
 
-Use Node.js 24, matching Vercel and Docker. Run commands from the repository root:
+Use Node.js 24, matching Vercel. Run commands from the repository root:
 
 ```sh
 npm run setup
@@ -32,6 +32,7 @@ Install both packages before running tests: frontend state tests import Vue. Tes
 ## Configuration
 
 - `PORT` defaults to `7700` for the Node server.
+- Set server environment variables in your shell or Vercel. The backend does not load `.env` files.
 - Optional `VITE_APP_URL` sets the base URL used for install links at build time. Otherwise the UI uses its current origin.
 - Do not put Redis or provider credentials in frontend environment variables. Each user supplies their own credentials through the interface.
 
@@ -43,9 +44,9 @@ Imports advance in bounded steps within a 60-second function budget. Hosting-pla
 
 Keep source changes in GitHub as well as Vercel. A direct source upload to Vercel does not commit or push local changes to the linked repository.
 
-## Node and Docker
+## Local production build
 
-For Node, run `npm run build` before `npm start`. For Docker, run `docker compose up --build`. The image builds Vue and serves the same Express app on port 7700. Its health check reads the public default manifest.
+Run `npm run build` before `npm start` to serve the built interface and addon API together on port 7700. The local entry point supports development and verification; production hosting uses Vercel's `api/index.js` entry point.
 
 ## Automation
 

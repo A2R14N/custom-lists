@@ -76,7 +76,6 @@ const originalFetch = globalThis.fetch;
 let server, base;
 
 before(async () => {
-  process.env.DOTENV_CONFIG_PATH = "__nonexistent_test_env__";
   globalThis.fetch = async (input, init) => {
     const url = new URL(typeof input === "string" ? input : input.url);
     if (url.hostname === "127.0.0.1") return originalFetch(input, init);

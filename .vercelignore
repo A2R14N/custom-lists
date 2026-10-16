@@ -12,6 +12,7 @@ vue/dist
 .work
 .codex
 .agents
+.vscode
 .commit_msg.txt
 docs
 .github
