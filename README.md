@@ -51,6 +51,5 @@ The app runs at `http://localhost:7700`. For development, use `npm run dev` and 
 - [Development and deployment](docs/development.md): scripts, Vercel, and CI.
 - [Storage and privacy](docs/storage-and-privacy.md): Redis keys, limits, and credentials.
 - [Provider references](docs/providers.md): API documentation and attribution.
-- [Contributing](CONTRIBUTING.md): local workflow and validation.
 
 This product uses the TMDB API but is not endorsed or certified by TMDB.
