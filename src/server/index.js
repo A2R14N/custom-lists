@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { handleConfiguredManifest, handleDefaultManifest } from "./routes/manifest.js";
 import { handleCatalog } from "./routes/catalog.js";
+import { handleTrending } from "./routes/discovery.js";
 import { handleListExport } from "../services/export-cache.js";
 import {
   handleConnect,
@@ -35,6 +36,7 @@ app.use(
 );
 
 app.post("/api/connect", handleConnect);
+app.get("/api/discovery/trending", handleTrending);
 app.post("/api/config", handleSaveConfig);
 app.get("/api/config/:userId", handleGetConfig);
 app.post("/api/cache/:userId", handleCacheList);

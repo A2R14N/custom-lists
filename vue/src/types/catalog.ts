@@ -62,6 +62,9 @@ export interface CatalogState extends Settings {
   connecting: boolean;
   saving: boolean;
   importing: boolean;
+  refreshingAll: boolean;
+  stopAfterCurrent: boolean;
+  refreshProgress: { done: number; total: number; failed: number } | null;
   lists: Catalog[];
   listUrl: string;
   listName: string;

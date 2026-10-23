@@ -8,3 +8,7 @@
 - [TMDB API FAQ](https://developer.themoviedb.org/docs/faq): free noncommercial API usage requires attribution; commercial usage requires arranging the appropriate license. Public availability alone does not mean commercial use.
 
 This product uses the TMDB API but is not endorsed or certified by TMDB. The official TMDB logo is included in the configuration page. Cinemeta is used as a metadata fallback for MDBList entries without posters.
+
+The welcome page displays three movies from [TMDB's weekly trending feed](https://developer.themoviedb.org/reference/trending-movies). The public `/api/discovery/trending` endpoint uses a dedicated server credential, returns only bounded public artwork metadata, and never reads a user's database or provider keys. Results are cached for six hours in process and in shared HTTP caches. On provider failure, a previous process snapshot can be shown for up to 24 hours as “Recently trending”; missing configuration, unavailable data or image errors restore the bundled example posters for Interstellar, Dune: Part Two, and The Grand Budapest Hotel. Saved list covers always represent their own cached titles.
+
+Manrope is self-hosted under the SIL Open Font License; its license is included at `vue/public/fonts/OFL-Manrope.txt`.

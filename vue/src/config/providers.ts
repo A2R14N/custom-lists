@@ -15,3 +15,8 @@ export const providerFilters: Array<{ id: SourceFilter; label: string }> = [
   { id: "all", label: "All lists" },
   ...Object.entries(providerNames).map(([id, label]) => ({ id: id as Provider, label })),
 ];
+
+export const categoryLabel = (category: string) =>
+  (
+    ({ movie: "Movies", series: "Series", cartoon: "Cartoons" }) as Record<string, string>
+  )[category] || category;

@@ -2,9 +2,13 @@
 import { nextTick, ref } from "vue";
 import AppIcon from "./AppIcon.vue";
 import type { CatalogState } from "../types/catalog";
-const props = defineProps<{ state: CatalogState; busy: boolean }>();
+const props = defineProps<{
+  state: CatalogState;
+  busy: boolean;
+  initialMode?: "database" | "link";
+}>();
 const emit = defineEmits<{ connect: []; restore: [url: string] }>();
-const returning = ref(false),
+const returning = ref(props.initialMode === "link"),
   installUrl = ref(""),
   showToken = ref(false);
 async function chooseConnection(useLink: boolean) {
@@ -15,17 +19,7 @@ async function chooseConnection(useLink: boolean) {
 }
 </script>
 <template>
-  <section class="connection-card" aria-labelledby="connect-heading">
-    <h2 id="connect-heading">
-      {{ returning ? "Welcome back" : "Connect your collection" }}
-    </h2>
-    <p class="connection-intro">
-      {{
-        returning
-          ? "Paste your private install link to pick up where you left off."
-          : "Use your own Upstash storage to save lists and bring back your existing collection."
-      }}
-    </p>
+  <section class="connection-card" aria-label="Connect your collection">
     <div class="connection-options" role="group" aria-label="How to connect">
       <button
         type="button"
@@ -90,8 +84,7 @@ async function chooseConnection(useLink: boolean) {
         class="button button-primary button-full connect-button"
         :disabled="busy || !state.upstashUrl || !state.upstashToken"
       >
-        <span v-if="busy" class="spinner" />{{
-          busy ? "Opening your collection…" : "Connect & continue"
+        <span v-if="busy" class="spinner" />{{ busy ? "Connecting…" : "Connect storage"
         }}<AppIcon v-if="!busy" name="arrow" :size="18" />
       </button>
     </form>
@@ -112,7 +105,7 @@ async function chooseConnection(useLink: boolean) {
         :disabled="busy || !installUrl"
       >
         <span v-if="busy" class="spinner" />{{
-          busy ? "Opening your collection…" : "Restore my collection"
+          busy ? "Opening your collection…" : "Open my collection"
         }}<AppIcon v-if="!busy" name="arrow" :size="18" />
       </button>
     </form>

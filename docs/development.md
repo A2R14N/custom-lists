@@ -33,12 +33,13 @@ Install both packages before running tests: frontend state tests import Vue. Tes
 
 - `PORT` defaults to `7700` for the Node server.
 - Set server environment variables in your shell or Vercel. The backend does not load `.env` files.
+- Optional `TMDB_TRENDING_API_KEY` (TMDB v3 API key) or `TMDB_TRENDING_ACCESS_TOKEN` (Read Access Token, takes precedence) enables the public homepage's weekly trending artwork. Keep it server-only, separate from users' list-import credentials. Locally, an ignored `.env.trending.local` can be loaded explicitly with `node --env-file=.env.trending.local index.js`. On Vercel, add it as a Secret for the intended deployment environments. No credential is needed to see the bundled fallback example.
 - Optional `VITE_APP_URL` sets the base URL used for install links at build time. Otherwise the UI uses its current origin.
 - Do not put Redis or provider credentials in frontend environment variables. Each user supplies their own credentials through the interface.
 
 ## Vercel
 
-Use the repository root, framework preset **Other**, and Node.js **24.x**. `vercel.json` installs the backend lockfile, installs the frontend lockfile before testing, runs tests, and builds Vue. Addon/API requests route to `api/index.js`, with the built configuration page included in the function. Private responses use `private, no-store` and `no-referrer`.
+Use the repository root, framework preset **Other**, and Node.js **24.x**. `vercel.json` installs the backend lockfile, installs the frontend lockfile before testing, runs tests, and builds Vue. Addon/API requests route to `api/index.js`, with the built configuration page included in the function. Private responses use `private, no-store` and `no-referrer`. Only `/api/discovery/trending` opts into public HTTP caching; it has no user data or credentials in its response. Serverless process caches are best-effort and reset on cold starts; no persistent shared database is introduced.
 
 Imports advance in bounded steps within a 60-second function budget. Hosting-plan limits still apply. Back up the user's Redis before a deployment that changes persistence behavior; this repository's tests never modify real Redis data.
 

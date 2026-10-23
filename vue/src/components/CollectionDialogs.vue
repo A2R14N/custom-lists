@@ -11,13 +11,23 @@ import EditListForm from "./EditListForm.vue";
 import CatalogPreview from "./CatalogPreview.vue";
 import ExportImport from "./ExportImport.vue";
 import HelpContent from "./HelpContent.vue";
+import ConnectionPanel from "./ConnectionPanel.vue";
 import { providerNames } from "../config/providers";
 import type { Catalog, Provider } from "../types/catalog";
 const props = defineProps<{ library: CatalogLibrary }>();
 const library = props.library;
 const { state, busy } = library;
 type DialogKind =
-  "add" | "settings" | "install" | "edit" | "remove" | "preview" | "help" | "export";
+  | "add"
+  | "settings"
+  | "install"
+  | "edit"
+  | "remove"
+  | "preview"
+  | "help"
+  | "export"
+  | "connect"
+  | "restore";
 const dialogKind = ref<DialogKind | null>(null);
 const providerHint = ref<Provider>("mdblist"),
   exportProvider = ref<"wetrakr" | "imdb">("wetrakr"),
@@ -27,8 +37,10 @@ const dialogTitle = computed(
   () =>
     ({
       add: "Add a list",
+      connect: "Connect your storage",
+      restore: "Open your collection",
       export: `Import ${exportProvider.value === "imdb" ? "IMDb" : "WeTrakr"} lists`,
-      settings: "Your workspace settings",
+      settings: "Settings & connections",
       install: "Install your collection",
       edit: "Edit list",
       remove: "Remove this list?",
@@ -40,6 +52,8 @@ const dialogDescription = computed(
   () =>
     ({
       add: "Paste a public list link or import a file from your exports.",
+      connect: "Your lists and settings live in your own Upstash database.",
+      restore: "Use your database credentials or private install link.",
       export:
         "Choose lists from your export to save directly in your own Upstash database.",
       settings: "Saved in your Upstash database. Only you control them.",
@@ -77,6 +91,19 @@ function openEdit(list: Catalog) {
   selectedList.value = list;
   openDialog("edit");
 }
+function openConnection(returning = false) {
+  if (!busy.value) openDialog(returning ? "restore" : "connect");
+}
+async function connect() {
+  if (await library.connect()) closeDialog();
+}
+async function restore(url: string) {
+  if (await library.restoreFromUrl(url)) closeDialog();
+}
+function openRemove(list: Catalog) {
+  selectedList.value = list;
+  openDialog("remove");
+}
 function showPreview(list: Catalog) {
   selectedList.value = list;
   openDialog("preview");
@@ -107,10 +134,20 @@ function exportComplete(count: number) {
     providerNames[exportProvider.value] +
     " " +
     (count === 1 ? "list" : "lists") +
-    " cached in your database.";
+    " imported.";
 }
 const isOpen = computed(() => dialogKind.value !== null);
-defineExpose({ isOpen, openDialog, openAdd, openExport, openEdit, showPreview, refresh });
+defineExpose({
+  isOpen,
+  openDialog,
+  openAdd,
+  openConnection,
+  openExport,
+  openEdit,
+  openRemove,
+  showPreview,
+  refresh,
+});
 </script>
 
 <template>
@@ -118,15 +155,30 @@ defineExpose({ isOpen, openDialog, openAdd, openExport, openEdit, showPreview, r
     :open="!!dialogKind"
     :title="dialogTitle"
     :description="dialogDescription"
-    :busy="state.saving || (dialogKind === 'export' && state.importing)"
+    :busy="
+      state.saving || state.connecting || (dialogKind === 'export' && state.importing)
+    "
     :wide="dialogKind === 'preview'"
     @close="closeDialog"
   >
-    <div v-if="state.error" class="alert alert-error" role="alert">
+    <div
+      v-if="state.error && dialogKind !== 'connect' && dialogKind !== 'restore'"
+      class="alert alert-error"
+      role="alert"
+    >
       <AppIcon name="help" /><span>{{ state.error }}</span>
     </div>
+    <ConnectionPanel
+      v-if="dialogKind === 'connect' || dialogKind === 'restore'"
+      :key="dialogKind"
+      :state="state"
+      :busy="busy"
+      :initial-mode="dialogKind === 'restore' ? 'link' : 'database'"
+      @connect="connect"
+      @restore="restore"
+    />
     <AddListForm
-      v-if="dialogKind === 'add'"
+      v-else-if="dialogKind === 'add'"
       :library="library"
       :provider="providerHint"
       @complete="closeDialog"

@@ -44,14 +44,13 @@ onMounted(() => {
       @help="dialogs?.openDialog('help')"
       @settings="dialogs?.openDialog('settings')"
       @install="dialogs?.openDialog('install')"
+      @start="dialogs?.openConnection(false)"
     />
     <main id="main">
       <WelcomeView
         v-if="!state.connected"
-        :state="state"
         :busy="busy"
-        @connect="library.connect"
-        @restore="library.restoreFromUrl"
+        @start="dialogs?.openConnection"
         @help="dialogs?.openDialog('help')"
       />
       <CollectionWorkspace
@@ -64,6 +63,7 @@ onMounted(() => {
         @preview="dialogs?.showPreview"
         @edit="dialogs?.openEdit"
         @refresh="dialogs?.refresh"
+        @remove="dialogs?.openRemove"
       />
     </main>
     <SiteFooter @help="dialogs?.openDialog('help')" />

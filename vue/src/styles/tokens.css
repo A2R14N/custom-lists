@@ -1,30 +1,36 @@
+@font-face {
+  font-family: Manrope;
+  src: url("/fonts/manrope-variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
 :root {
   color-scheme: dark;
-  --font: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
-  --canvas: #090909;
-  --surface: #141414;
-  --surface-raised: #1c1c1c;
-  --surface-hover: #272727;
-  --input: #0d0d0d;
-  --ink: #eeeeee;
-  --muted: #aaaaaa;
-  --subtle: #929292;
-  --line: #292929;
-  --line-strong: #3c3c3c;
-  --accent: #e0e0e0;
-  --accent-soft: #202020;
-  --accent-border: #484848;
-  --primary: #eeeeee;
-  --primary-hover: #ffffff;
-  --on-primary: #141414;
-  /* Status is also communicated with explicit labels, icons, and roles. */
-  --success: #95c8ae;
-  --success-soft: #18221c;
-  --success-border: #314638;
-  --warning: #d7b98e;
-  --warning-soft: #252119;
-  --warning-border: #493f2e;
-  --danger: #ffada9;
-  --danger-soft: #2c1c1e;
-  --danger-border: #60383c;
+  --font: Manrope, "Segoe UI", sans-serif;
+  --canvas: #08090b;
+  --surface: #121417;
+  --surface-raised: #1c1f24;
+  --surface-hover: #23272e;
+  --input: #101215;
+  --ink: #f1f3f5;
+  --muted: #a0a7b2;
+  --subtle: #8b94a3;
+  --line: #25292f;
+  --line-strong: #363c46;
+  --accent: #92aaff;
+  --accent-soft: #1b2540;
+  --accent-border: #344974;
+  --primary: #4667ed;
+  --primary-hover: #5576fa;
+  --on-primary: #ffffff;
+  --success: #80cfa6;
+  --success-soft: #12261e;
+  --success-border: #264c3b;
+  --warning: #e2ba78;
+  --warning-soft: #292215;
+  --warning-border: #514126;
+  --danger: #f28e9b;
+  --danger-soft: #2c191e;
+  --danger-border: #59313b;
 }

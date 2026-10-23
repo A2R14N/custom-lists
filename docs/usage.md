@@ -2,15 +2,17 @@
 
 ## Use
 
-1. Open the configuration page and enter the REST URL and read/write REST token for a **dedicated Upstash Redis database**.
-2. Click **Connect & continue**. This only reads existing data; it never saves an empty configuration. Returning users can instead choose **Already have an install link?** to restore their workspace.
-3. Choose **Add a list** and paste a public list URL. The source is detected automatically. Add a display name and category if needed.
-4. The app requests a provider key only when required: your [MDBList API key](https://mdblist.com/preferences/#api), [TMDB API Read Access Token](https://www.themoviedb.org/settings/api), or [WeTrakr app key/client ID](https://wetrakr.com/profile/settings/api). TMDB uses the long bearer token, not the v3 API key. Choose **Add to my collection** and keep the page open during import.
+1. Choose **Set up my collection** and enter the REST URL and read/write REST token for a **dedicated Upstash Redis database**.
+2. Click **Connect storage**. This only reads existing data; it never saves an empty configuration. Returning users can choose **I have an install link** to reopen their collection.
+3. Choose **Add a list** and paste a public list URL. The source is detected automatically. Expand **Display options** to add a display name or change its category.
+4. The app requests a provider key only when required: your [MDBList API key](https://mdblist.com/preferences/#api), [TMDB API Read Access Token](https://www.themoviedb.org/settings/api), or [WeTrakr app key/client ID](https://wetrakr.com/profile/settings/api). TMDB uses the long bearer token, not the v3 API key. Choose **Import list** and keep the page open during import.
 5. Choose **Install addon**. Open it in Stremio, or copy the private HTTPS URL into Nuvio's addon installer.
 
-The workspace includes source filters with list counts, search by name/source/category, title previews, display-name editing, and ordering controls. Sort the workspace by addon order, name, or title count; sorting only changes the view, not the order in your addon. To change addon order, clear filters and choose **Addon order**, then use the list's up/down controls. File import buttons for WeTrakr and IMDb are also available inside **Add a list**. Provider keys and advanced install-link settings are under **Settings**. Disconnect clears credentials from this session without deleting your database.
+Switch between grid and list layouts, search by name/source/category, and combine source, category and saved-status filters. **Needs attention** shows lists with failed refreshes or no imported snapshot. Use the list menu to edit, refresh or remove a list. Sort by addon order, name, or title count; sorting only changes this view. Choose **Arrange** to clear filters and change addon order with drag-and-drop or the up/down buttons, then choose **Done arranging**. File import choices are under **Add a list → Upload export**. Provider keys and advanced install-link settings are under **Settings**. Disconnect clears credentials from this session without deleting your database.
 
-List covers are full-color poster collages derived from the first distinct posters in each saved snapshot, displayed within a black and charcoal interface. They update after a successful import and work with legacy Trakt caches too. Missing or broken posters fall back to muted illustrated covers. No new image files or Redis keys are stored; images load directly from the cached poster URLs with no referrer.
+**Refresh API lists** updates each eligible MDBList, TMDB and WeTrakr API snapshot once, even when it appears in several categories. It skips lists without a saved provider key, file exports and preserved Trakt snapshots. A failed list does not stop the queue. **Stop after this list** finishes the current import and leaves later lists untouched. Keep the page open during imports. Existing snapshots remain available after a failed refresh.
+
+List covers use posters from each saved snapshot in a bright interface with a locally hosted Manrope font. Covers update after a successful import and work with legacy Trakt caches. Missing or broken images use an illustrated fallback. Covers add no Redis keys and load cached poster URLs with no referrer. The welcome page includes three static example posters; these are separate from your personal collection.
 
 Supported URLs include:
 
@@ -35,7 +37,7 @@ API lists use `wetrakr-api:<numeric-id>` keys. Existing ZIP/CSV lists retain `we
 
 ## Cache a WeTrakr export directly
 
-Choose **WeTrakr** in the sources panel, or **Have a WeTrakr export?** inside Add a list. Select the original ZIP or `lists.csv`, choose which lists to cache and their categories, then click **Cache selected lists**. This does not import your data into another platform and requires no provider API key.
+Choose **Add a list → Upload export → WeTrakr ZIP or CSV**. Select the original ZIP or `lists.csv`, choose which lists to import and their categories, then click **Import selected lists**. This does not import your data into another platform and requires no provider API key.
 
 The browser reads the ZIP locally and ignores notes and unrelated files. Only selected list names and title rows are sent to the addon backend, which validates them and writes complete snapshots to your own Upstash database. The original ZIP and CSV are not stored on the server. Posters use the existing IMDb-based image service; no metadata API calls are required to create the cache. IMDb IDs are used for Stremio title identity, and TMDB IDs are retained in each supported metadata entry.
 
@@ -45,7 +47,7 @@ Updates are manual: select a new export. The export has no list ID, so the exact
 
 ## IMDb CSV exports
 
-Choose **IMDb** in the sources panel (or **Have an IMDb CSV?** under Add a list), select the original CSV, give it a unique list name, select the list and click **Cache selected lists**. No IMDb key or intermediary platform is required. The browser parses the file; only normalized title rows are sent to your own Upstash cache. Personal ratings, descriptions and other unused fields are not uploaded.
+Choose **Add a list → Upload export → IMDb CSV**, select the original CSV, give it a unique list name, select the list and click **Import selected lists**. No IMDb key or intermediary platform is required. The browser parses the file; only normalized title rows are sent to your own Upstash cache. Personal ratings, descriptions and other unused fields are not uploaded.
 
 IMDb does not include the list name or ID in these exports. Reuse the exact same name when uploading an updated CSV to replace that IMDb snapshot while preserving its display name and category. Different names create separate caches; other providers, including preserved Trakt snapshots, remain unchanged. IMDb snapshots do not automatically refresh.
 

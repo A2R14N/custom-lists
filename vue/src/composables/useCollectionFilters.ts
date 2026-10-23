@@ -7,12 +7,23 @@ import type { CatalogState } from "../types/catalog";
 export function useCollectionFilters(state: CatalogState) {
   const filter = ref<SourceFilter>("all");
   const search = ref("");
+  const category = ref("");
+  const status = ref<"all" | "saved" | "attention">("all");
+  const viewMode = ref<"grid" | "list">("grid");
+  const categories = computed(() =>
+    [...new Set(state.lists.map((list) => list.categoryName))].sort(),
+  );
   const sortBy = ref<"addon" | "name" | "titles">("addon");
   const visibleLists = computed(() => {
     const query = search.value.toLowerCase().trim();
     const lists = state.lists.filter(
       (list) =>
         (filter.value === "all" || list.provider === filter.value) &&
+        (!category.value || list.categoryName === category.value) &&
+        (status.value === "all" ||
+          (status.value === "saved"
+            ? list.cached && !list.error
+            : !list.cached || !!list.error)) &&
         `${listLabel(list)} ${list.categoryName} ${list.username} ${providerNames[list.provider]}`
           .toLowerCase()
           .includes(query),
@@ -37,15 +48,27 @@ export function useCollectionFilters(state: CatalogState) {
       ]),
     ),
   );
-  const hasFilters = computed(() => filter.value !== "all" || !!search.value.trim());
+  const hasFilters = computed(
+    () =>
+      filter.value !== "all" ||
+      !!search.value.trim() ||
+      !!category.value ||
+      status.value !== "all",
+  );
   const canReorder = computed(() => sortBy.value === "addon" && !hasFilters.value);
   function clearFilters() {
     search.value = "";
     filter.value = "all";
+    category.value = "";
+    status.value = "all";
   }
   return {
     filter,
     search,
+    category,
+    status,
+    viewMode,
+    categories,
     sortBy,
     filters: providerFilters,
     visibleLists,

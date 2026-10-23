@@ -120,3 +120,33 @@ test("reordering is available only in unfiltered addon order", () => {
   assert.equal(view.sortBy.value, "name");
   assert.equal(view.canReorder.value, false);
 });
+
+test("category and attention filters combine without changing the saved list order", () => {
+  const view = collection();
+  const original = view.state.lists.map((list) => list.listId);
+  view.state.lists[0].error = "Provider quota reached";
+  view.state.lists[1].cached = false;
+  view.status.value = "attention";
+  assert.deepEqual(
+    view.visibleLists.value.map((list) => list.provider),
+    ["mdblist", "tmdb"],
+  );
+  view.category.value = "series";
+  assert.equal(view.visibleLists.value[0].provider, "tmdb");
+  assert.equal(view.canReorder.value, false);
+  assert.deepEqual(view.categories.value, ["cartoon", "movie", "series"]);
+  view.clearFilters();
+  view.status.value = "saved";
+  assert.deepEqual(
+    view.visibleLists.value.map((list) => list.provider),
+    ["trakt"],
+  );
+  view.viewMode.value = "list";
+  view.clearFilters();
+  assert.equal(view.viewMode.value, "list");
+  assert.equal(view.canReorder.value, true);
+  assert.deepEqual(
+    view.state.lists.map((list) => list.listId),
+    original,
+  );
+});

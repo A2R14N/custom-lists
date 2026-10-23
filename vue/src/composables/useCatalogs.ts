@@ -32,6 +32,9 @@ export function useCatalogs(options: CatalogOptions = {}) {
     connecting: false,
     saving: false,
     importing: false,
+    refreshingAll: false,
+    stopAfterCurrent: false,
+    refreshProgress: null,
     mdblistApiKey: "",
     tmdbAccessToken: "",
     wetrakrApiKey: "",
@@ -49,7 +52,9 @@ export function useCatalogs(options: CatalogOptions = {}) {
   // Session-only previews: bounded, short-lived, and cleared when snapshots change.
   const previews = new Map<string, { expires: number; data: Promise<Meta[]> }>();
   const state = reactive<CatalogState>(initial());
-  const busy = computed(() => state.connecting || state.saving || state.importing);
+  const busy = computed(
+    () => state.connecting || state.saving || state.importing || state.refreshingAll,
+  );
   const parsed = computed<{ list: ListDefinition | null; error: string }>(() => {
     if (!state.listUrl.trim()) return { list: null, error: "" };
     try {
@@ -296,7 +301,11 @@ export function useCatalogs(options: CatalogOptions = {}) {
   }
 
   async function runImport(list: Catalog) {
-    if (busy.value) return;
+    if (busy.value) return false;
+    return importSnapshot(list);
+  }
+
+  async function importSnapshot(list: Catalog) {
     state.importing = true;
     list.status = "importing";
     list.error = "";
@@ -322,15 +331,55 @@ export function useCatalogs(options: CatalogOptions = {}) {
       }
       previews.clear();
       list.skipped = progress.skipped;
-      state.message = `${listLabel(list)} is ready to watch.`;
+      if (!state.refreshingAll) state.message = `${listLabel(list)} updated.`;
+      return true;
     } catch (error) {
       list.error =
         messageOf(error) +
         (list.cached ? " Your previous snapshot is still available." : "");
+      return false;
     } finally {
       list.status = "idle";
       state.importing = false;
     }
+  }
+
+  const refreshableLists = computed(() => {
+    const seen = new Set<string>();
+    return state.lists.filter((list) => {
+      const key = catalogId(list);
+      if (!canImport(list) || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  });
+
+  async function refreshAll() {
+    if (busy.value || !refreshableLists.value.length) return;
+    const pending = [...refreshableLists.value];
+    state.refreshingAll = true;
+    state.stopAfterCurrent = false;
+    state.message = "";
+    state.error = "";
+    state.refreshProgress = { done: 0, total: pending.length, failed: 0 };
+    try {
+      for (const list of pending) {
+        if (state.stopAfterCurrent) break;
+        const success = await importSnapshot(list);
+        state.refreshProgress.done++;
+        if (!success) state.refreshProgress.failed++;
+      }
+      const { done, failed } = state.refreshProgress;
+      state.message = `${done - failed} ${done - failed === 1 ? "list" : "lists"} updated.${failed ? ` ${failed} failed; check the list for details.` : ""}${state.stopAfterCurrent ? " Refresh queue stopped." : ""}`;
+    } finally {
+      state.refreshingAll = false;
+      state.stopAfterCurrent = false;
+      state.refreshProgress = null;
+    }
+  }
+
+  function stopRefresh() {
+    if (state.refreshingAll) state.stopAfterCurrent = true;
   }
 
   async function editList(list: Catalog, name: string, categoryName: string) {
@@ -470,6 +519,9 @@ export function useCatalogs(options: CatalogOptions = {}) {
     saveSettings,
     addList,
     runImport,
+    refreshableLists,
+    refreshAll,
+    stopRefresh,
     cacheExport,
     editList,
     moveList,

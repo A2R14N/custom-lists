@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from "vue";
+import { ref, watch, onMounted, nextTick, useId } from "vue";
 import AppIcon from "./AppIcon.vue";
 const props = defineProps<{
   open: boolean;
@@ -10,6 +10,8 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ close: [] }>();
 const dialog = ref<HTMLDialogElement>();
+const titleId = `dialog-title-${useId()}`;
+const descriptionId = `${titleId}-description`;
 async function sync() {
   await nextTick();
   if (props.open && !dialog.value?.open) dialog.value?.showModal();
@@ -21,7 +23,7 @@ watch(
   async () => {
     await nextTick();
     if (props.open && dialog.value?.open)
-      dialog.value.querySelector<HTMLElement>("#dialog-title")?.focus();
+      dialog.value.querySelector<HTMLElement>(`[id="${titleId}"]`)?.focus();
   },
 );
 onMounted(sync);
@@ -34,8 +36,8 @@ function dismiss() {
     ref="dialog"
     class="dialog"
     :class="{ 'dialog-wide': wide }"
-    aria-labelledby="dialog-title"
-    :aria-describedby="description ? 'dialog-description' : undefined"
+    :aria-labelledby="titleId"
+    :aria-describedby="description ? descriptionId : undefined"
     @cancel.prevent="dismiss"
     @close="emit('close')"
     @click="
@@ -47,8 +49,8 @@ function dismiss() {
     <div class="dialog-content">
       <header class="dialog-heading">
         <div>
-          <h2 id="dialog-title" tabindex="-1">{{ title }}</h2>
-          <p v-if="description" id="dialog-description">{{ description }}</p>
+          <h2 :id="titleId" tabindex="-1">{{ title }}</h2>
+          <p v-if="description" :id="descriptionId">{{ description }}</p>
         </div>
         <button
           class="icon-button"

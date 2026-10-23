@@ -1,29 +1,48 @@
 <script setup lang="ts">
+import { computed, ref, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
 import type { CatalogLibrary } from "../composables/useCatalogs";
-import { computed, ref, watch } from "vue";
 import { providerNames } from "../config/providers";
 import type { Provider } from "../types/catalog";
 const props = defineProps<{ library: CatalogLibrary; provider: Provider }>();
 const { state, busy, parsed } = props.library;
-const library = props.library;
 const emit = defineEmits<{ complete: []; export: [provider: "wetrakr" | "imdb"] }>();
-const providerHint = ref(props.provider),
-  providerKey = ref(""),
-  customCategory = ref(false);
-const detectedProvider = computed(
-  () => parsed.value.list?.provider || providerHint.value,
-);
+const method = ref<"link" | "file">("link");
+const providerKey = ref("");
+const customCategory = ref(false);
+const detectedProvider = computed(() => parsed.value.list?.provider || props.provider);
 const needsKey = computed(
   () =>
     parsed.value.list &&
     parsed.value.list.provider !== "trakt" &&
-    !library.canImport(parsed.value.list),
+    !props.library.canImport(parsed.value.list),
+);
+const keyLabel = computed(() =>
+  detectedProvider.value === "mdblist"
+    ? "MDBList API key"
+    : detectedProvider.value === "wetrakr-api"
+      ? "WeTrakr app key"
+      : "TMDB read access token",
+);
+const keyUrl = computed(() =>
+  detectedProvider.value === "mdblist"
+    ? "https://mdblist.com/preferences/#api"
+    : detectedProvider.value === "wetrakr-api"
+      ? "https://wetrakr.com/profile/settings/api"
+      : "https://www.themoviedb.org/settings/api",
+);
+const placeholder = computed(() =>
+  props.provider === "tmdb"
+    ? "https://www.themoviedb.org/list/…"
+    : props.provider === "wetrakr-api"
+      ? "https://wetrakr.com/lists/…"
+      : props.provider === "trakt"
+        ? "https://trakt.tv/users/…/lists/…"
+        : "https://mdblist.com/lists/…/…",
 );
 watch(detectedProvider, () => {
   providerKey.value = "";
 });
-const openExport = (provider: "wetrakr" | "imdb") => emit("export", provider);
 async function submitList() {
   if (busy.value || !parsed.value.list) return;
   if (needsKey.value) {
@@ -38,116 +57,88 @@ async function submitList() {
     else if (detectedProvider.value === "wetrakr-api")
       settings.wetrakrApiKey = providerKey.value.trim();
     else settings.tmdbAccessToken = providerKey.value.trim();
-    if (!(await library.saveSettings(settings))) return;
+    if (!(await props.library.saveSettings(settings))) return;
   }
-  await library.addList(() => emit("complete"));
+  await props.library.addList(() => emit("complete"));
 }
 </script>
-
 <template>
-  <form @submit.prevent="submitList">
-    <div class="source-choice" aria-label="List source">
-      <button
-        v-for="provider in ['mdblist', 'tmdb', 'wetrakr-api', 'trakt'] as const"
-        :key="provider"
-        type="button"
-        :class="{ selected: detectedProvider === provider }"
-        :aria-pressed="detectedProvider === provider"
-        :disabled="!!parsed.list || busy"
-        @click="providerHint = provider"
+  <div>
+    <div class="import-methods" role="group" aria-label="Import method">
+      <button :aria-pressed="method === 'link'" :disabled="busy" @click="method = 'link'">
+        <AppIcon name="link" :size="16" />List URL</button
+      ><button
+        :aria-pressed="method === 'file'"
+        :disabled="busy"
+        @click="method = 'file'"
       >
-        <span class="provider-dot" :class="provider"></span>{{ providerNames[provider] }}
+        <AppIcon name="upload" :size="16" />Upload export
       </button>
     </div>
-    <label class="field-label" for="list-url">Paste a list URL</label>
-    <div class="input-with-icon">
-      <AppIcon name="link" :size="18" /><input
-        id="list-url"
-        v-model="state.listUrl"
-        :disabled="busy"
-        :placeholder="
-          providerHint === 'tmdb'
-            ? 'https://www.themoviedb.org/list/…'
-            : providerHint === 'wetrakr-api'
-              ? 'https://wetrakr.com/lists/…'
-              : providerHint === 'trakt'
-                ? 'https://trakt.tv/users/…/lists/…'
-                : 'https://mdblist.com/lists/…/…'
-        "
-        autocomplete="off"
-        spellcheck="false"
-        required
-      />
-    </div>
-    <p v-if="parsed.error" class="inline-error" role="alert">
-      {{ parsed.error }}
-    </p>
-    <p v-else-if="parsed.list" class="field-hint success-text">
-      <AppIcon name="check" :size="14" />{{ providerNames[parsed.list.provider] }}
-      list recognized
-    </p>
-    <p v-else class="field-hint">We’ll recognize the source automatically.</p>
-    <div v-if="needsKey" class="inline-provider-setup">
-      <div><AppIcon name="lock" :size="18" /><strong>One quick connection</strong></div>
-      <p>
-        {{
-          detectedProvider === "mdblist"
-            ? "Add your MDBList API key. We’ll save it for your next import."
-            : detectedProvider === "wetrakr-api"
-              ? "Add your WeTrakr app key (client ID) to import public lists. We’ll save it for your next import."
-              : "Add your TMDB API Read Access Token—the long token, not the v3 API key."
-        }}
+    <form v-if="method === 'link'" @submit.prevent="submitList">
+      <label class="field-label" for="list-url">Public list URL</label>
+      <div class="input-with-icon">
+        <AppIcon name="link" :size="18" /><input
+          id="list-url"
+          v-model="state.listUrl"
+          :placeholder="placeholder"
+          autocomplete="off"
+          spellcheck="false"
+          :disabled="busy"
+          required
+        />
+      </div>
+      <p v-if="parsed.error" class="inline-error" role="alert">{{ parsed.error }}</p>
+      <p v-else-if="parsed.list" class="field-hint success-text">
+        <AppIcon name="check" :size="14" />{{ providerNames[parsed.list.provider] }} list
+        recognized
       </p>
-      <label class="field-label" for="provider-key">{{
-        detectedProvider === "mdblist"
-          ? "MDBList API key"
-          : detectedProvider === "wetrakr-api"
-            ? "WeTrakr app key"
-            : "TMDB Read Access Token"
-      }}</label
-      ><input
-        id="provider-key"
-        v-model="providerKey"
-        type="password"
-        autocomplete="off"
-        :disabled="busy"
-        required
-      /><a
-        :href="
-          detectedProvider === 'mdblist'
-            ? 'https://mdblist.com/preferences/#api'
-            : detectedProvider === 'wetrakr-api'
-              ? 'https://wetrakr.com/profile/settings/api'
-              : 'https://www.themoviedb.org/settings/api'
-        "
-        target="_blank"
-        rel="noopener noreferrer"
-        >Where do I find this?<AppIcon name="external" :size="13"
-      /></a>
-    </div>
-    <p v-if="detectedProvider === 'wetrakr-api'" class="field-hint">
-      Public lists only. For private lists, use the WeTrakr ZIP / CSV import below.
-    </p>
-    <div v-if="detectedProvider === 'trakt'" class="alert alert-info">
-      <AppIcon name="archive" /><span
-        >Trakt links can reconnect a snapshot already in your database. They won’t fetch
-        new titles from Trakt.</span
-      >
-    </div>
-    <div class="form-row">
-      <div>
+      <p v-else class="field-hint">
+        MDBList, TMDB or WeTrakr. Saved Trakt links can reconnect an existing snapshot.
+      </p>
+      <div v-if="needsKey" class="inline-provider-setup">
+        <div>
+          <AppIcon name="lock" :size="17" /><strong
+            >Connect {{ providerNames[detectedProvider] }}</strong
+          >
+        </div>
+        <p v-if="detectedProvider === 'tmdb'">
+          Use the long API read access token, not the v3 API key.
+        </p>
+        <p v-else-if="detectedProvider === 'wetrakr-api'">
+          Use your own app key (client ID). Public lists only; private lists can be
+          imported from an export.
+        </p>
+        <p v-else>Your key is saved in your database for future imports.</p>
+        <label class="field-label" for="provider-key">{{ keyLabel }}</label
+        ><input
+          id="provider-key"
+          v-model="providerKey"
+          type="password"
+          autocomplete="off"
+          :disabled="busy"
+          required
+        /><a :href="keyUrl" target="_blank" rel="noopener noreferrer"
+          >Get a key or token<AppIcon name="external" :size="13"
+        /></a>
+      </div>
+      <div v-if="detectedProvider === 'trakt'" class="alert alert-info">
+        <AppIcon name="archive" /><span
+          >Reconnects titles already saved in your database. New Trakt imports are not
+          supported.</span
+        >
+      </div>
+      <details class="display-options">
+        <summary>Display options<AppIcon name="down" :size="16" /></summary>
         <label class="field-label" for="list-name"
-          >Give it a name <span>Optional</span></label
+          >Display name <span>Optional</span></label
         ><input
           id="list-name"
           v-model="state.listName"
-          placeholder="My weekend watchlist"
+          placeholder="For example: Weekend movies"
           maxlength="120"
           :disabled="busy"
-        />
-      </div>
-      <div>
-        <label class="field-label" for="list-category">Show under</label
+        /><label class="field-label" for="list-category">Category</label
         ><select
           v-if="!customCategory"
           id="list-category"
@@ -161,55 +152,54 @@ async function submitList() {
           v-else
           id="list-category"
           v-model="state.category"
-          placeholder="Custom category"
+          placeholder="Category name"
           :disabled="busy"
           required
-        />
+        /><button
+          type="button"
+          class="text-button advanced-toggle"
+          :disabled="busy"
+          @click="
+            customCategory = !customCategory;
+            if (!customCategory) state.category = 'movie';
+          "
+        >
+          {{ customCategory ? "Use a standard category" : "Use a custom category" }}
+        </button>
+      </details>
+      <div class="dialog-footer">
+        <p><AppIcon name="shield" :size="14" />Saved titles stay safe.</p>
+        <button
+          class="button button-primary"
+          :disabled="busy || !parsed.list || (!!needsKey && !providerKey.trim())"
+        >
+          <span v-if="busy" class="spinner" />{{
+            detectedProvider === "trakt" ? "Reconnect list" : "Import list"
+          }}
+        </button>
       </div>
-    </div>
-    <button
-      type="button"
-      class="text-button advanced-toggle"
-      :disabled="busy"
-      @click="
-        customCategory = !customCategory;
-        if (!customCategory) state.category = 'movie';
-      "
-    >
-      {{ customCategory ? "Use a standard category" : "Use a custom category" }}
-    </button>
-    <div class="file-import-options">
-      <h3>Import a file instead</h3>
-      <p>No provider API key needed.</p>
+    </form>
+    <div v-else class="file-import-options file-import-picker">
+      <h3>Bring an export you already have.</h3>
+      <p>
+        Files are read in your browser. Choose the lists to save in the next step. No
+        provider key is required.
+      </p>
       <div>
         <button
-          type="button"
           class="button button-secondary"
           :disabled="busy"
-          @click="openExport('wetrakr')"
+          @click="emit('export', 'wetrakr')"
         >
-          <AppIcon name="archive" :size="17" />WeTrakr ZIP / CSV
-        </button>
-        <button
-          type="button"
+          <AppIcon name="archive" :size="18" />WeTrakr ZIP or CSV</button
+        ><button
           class="button button-secondary"
           :disabled="busy"
-          @click="openExport('imdb')"
+          @click="emit('export', 'imdb')"
         >
-          <AppIcon name="film" :size="17" />IMDb CSV
+          <AppIcon name="film" :size="18" />IMDb CSV
         </button>
       </div>
     </div>
-    <div class="dialog-footer">
-      <p><AppIcon name="shield" :size="14" />Existing snapshots stay safe.</p>
-      <button
-        class="button button-primary"
-        :disabled="busy || !parsed.list || (!!needsKey && !providerKey.trim())"
-      >
-        <span v-if="busy" class="spinner" />{{
-          detectedProvider === "trakt" ? "Reconnect snapshot" : "Add to my collection"
-        }}<AppIcon v-if="!busy" name="arrow" :size="16" />
-      </button>
-    </div>
-  </form>
+  </div>
 </template>

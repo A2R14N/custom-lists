@@ -65,8 +65,8 @@ async function removeSelected() {
     <div class="removal-summary">
       <AppIcon name="archive" :size="28" /><strong>{{ listLabel(selectedList) }}</strong>
       <p>
-        The snapshot stays in your database. You can reconnect it later using the original
-        list URL.
+        Its saved titles stay in your database. Reconnect a public list with its original
+        URL, or upload the same file export again.
       </p>
     </div>
     <div class="dialog-footer">

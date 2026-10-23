@@ -34,6 +34,7 @@ function onError(url: string) {
       :src="poster"
       :data-slot="index"
       alt=""
+      :draggable="false"
       loading="lazy"
       decoding="async"
       referrerpolicy="no-referrer"
@@ -51,49 +52,30 @@ function onError(url: string) {
   overflow: hidden;
   isolation: isolate;
   border-radius: inherit;
-  background: var(--input);
-  border: 1px solid var(--line);
+  background: var(--surface-hover);
+  display: flex;
 }
 .catalog-cover img {
-  position: absolute;
-  width: 66%;
-  height: 83%;
-  top: 9%;
+  width: 35%;
+  min-width: 0;
+  height: 100%;
   object-fit: cover;
-  background: var(--surface-raised);
-  border: 1px solid #ffffff24;
-  border-radius: 3px;
-  box-shadow: 0 3px 8px #00000080;
+  object-position: center 24%;
+  background: var(--surface-hover);
 }
 .catalog-cover img[data-slot="0"] {
-  left: 17%;
-  z-index: 3;
+  width: 42%;
 }
 .catalog-cover img[data-slot="1"] {
-  left: -12%;
-  top: 15%;
-  transform: rotate(-13deg);
-  z-index: 1;
+  width: 31%;
 }
 .catalog-cover img[data-slot="2"] {
-  right: -12%;
-  top: 15%;
-  transform: rotate(13deg);
-  z-index: 2;
+  width: 27%;
 }
 .catalog-cover[data-count="1"] img {
-  inset: 0;
   width: 100%;
-  height: 100%;
-  border: 0;
-  border-radius: inherit;
 }
-.catalog-cover[data-count="2"] img[data-slot="0"] {
-  left: 28%;
-  transform: rotate(6deg);
-}
-.catalog-cover[data-count="2"] img[data-slot="1"] {
-  left: 1%;
-  transform: rotate(-10deg);
+.catalog-cover[data-count="2"] img {
+  width: 50%;
 }
 </style>

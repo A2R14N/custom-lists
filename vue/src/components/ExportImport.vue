@@ -101,8 +101,8 @@ async function saveSelected() {
     <div class="alert alert-info">
       <AppIcon name="shield" />
       <span
-        >Read locally, cache directly. Nothing is imported into another platform. No
-        provider key needed.</span
+        >Choose the lists to save in your database. Your original file stays in this
+        browser. No provider key is required.</span
       >
     </div>
     <label class="field-label" for="wetrakr-file">Choose your {{ label }} export</label>
@@ -177,7 +177,7 @@ async function saveSelected() {
               }}</strong>
               <small>{{
                 list.saved
-                  ? "Cached successfully"
+                  ? "Imported"
                   : `${list.metas.length} titles ready · ${list.total} exported`
               }}</small>
               <small v-if="list.missingIds">{{ list.missingIds }} missing IMDb IDs</small>
@@ -204,7 +204,7 @@ async function saveSelected() {
         display settings. Other providers’ caches are separate.
       </p>
       <p v-if="saving" class="field-hint" role="status">
-        Caching {{ savingName }}… Keep this page open.
+        Importing {{ savingName }}… Keep this page open.
       </p>
     </template>
     <div class="dialog-footer">
@@ -215,7 +215,7 @@ async function saveSelected() {
           locked || !selected.length || (provider === 'imdb' && !sourceName.trim())
         "
       >
-        <span v-if="saving" class="spinner" />Cache selected lists<AppIcon
+        <span v-if="saving" class="spinner" />Import selected lists<AppIcon
           v-if="!saving"
           name="arrow"
           :size="16"
@@ -235,7 +235,7 @@ async function saveSelected() {
 }
 .export-summary small {
   display: block;
-  color: #999;
+  color: var(--muted);
   font-size: 11px;
   overflow-wrap: anywhere;
 }
@@ -250,9 +250,9 @@ async function saveSelected() {
   align-items: center;
   gap: 12px;
   padding: 14px;
-  border: 1px solid #333;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: #151515;
+  background: var(--canvas);
 }
 .export-choice label {
   display: flex;
@@ -268,7 +268,7 @@ async function saveSelected() {
   min-height: 0;
   flex-shrink: 0;
   margin-top: 3px;
-  accent-color: #db9a55;
+  accent-color: var(--accent);
 }
 .export-choice strong {
   display: block;
@@ -278,7 +278,7 @@ async function saveSelected() {
 .export-choice small {
   display: block;
   margin-top: 4px;
-  color: #aaa;
+  color: var(--muted);
   font-size: 11px;
 }
 .export-choice select {
@@ -290,18 +290,18 @@ async function saveSelected() {
 input[type="file"] {
   width: 100%;
   padding: 16px;
-  border: 1px dashed #555;
+  border: 1px dashed var(--line-strong);
   border-radius: 12px;
-  background: #151515;
-  color: #bbb;
+  background: var(--canvas);
+  color: var(--muted);
 }
 input[type="file"]::file-selector-button {
   margin-right: 12px;
   padding: 8px 12px;
-  border: 1px solid #555;
+  border: 1px solid var(--line-strong);
   border-radius: 8px;
-  background: #292929;
-  color: #eee;
+  background: var(--surface);
+  color: var(--ink);
   cursor: pointer;
 }
 @media (max-width: 480px) {
