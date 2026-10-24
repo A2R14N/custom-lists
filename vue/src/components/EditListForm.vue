@@ -13,9 +13,17 @@ const { busy, state } = props.library;
 const selectedList = props.list;
 const editName = ref(props.list.name || ""),
   editCategory = ref(props.list.categoryName);
+const showInAddon = ref(!props.list.hidden);
 const emit = defineEmits<{ complete: []; remove: []; keep: [] }>();
 async function saveEdit() {
-  if (await props.library.editList(props.list, editName.value, editCategory.value))
+  if (
+    await props.library.editList(
+      props.list,
+      editName.value,
+      editCategory.value,
+      !showInAddon.value,
+    )
+  )
     emit("complete");
 }
 async function removeSelected() {
@@ -44,6 +52,13 @@ async function removeSelected() {
       <option value="series" />
       <option value="cartoon" />
     </datalist>
+    <label class="visibility-control"
+      ><input v-model="showInAddon" type="checkbox" :disabled="busy" />Show this list in
+      my addon</label
+    >
+    <p v-if="!showInAddon" class="field-hint">
+      The row will be hidden in Stremio and Nuvio. Saved titles stay in your database.
+    </p>
     <p class="field-hint">
       The source and cached titles stay unchanged. Clients may require a manifest reload
       to show edits.

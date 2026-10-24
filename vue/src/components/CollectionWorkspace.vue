@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from "vue";
+import { computed, onMounted, onBeforeUnmount } from "vue";
 import AppIcon from "./AppIcon.vue";
 import CatalogCard from "./CatalogCard.vue";
 import type { CatalogLibrary } from "../composables/useCatalogs";
@@ -20,11 +20,9 @@ const {
   filters,
   visibleLists,
   hasFilters,
-  canReorder,
   clearFilters,
 } = useCollectionFilters(state);
-const arranging = ref(false);
-const dragged = ref<Catalog | null>(null);
+const hiddenCount = computed(() => state.lists.filter((list) => list.hidden).length);
 const activeImport = computed(() =>
   state.lists.find((list) => list.status === "importing"),
 );
@@ -39,14 +37,8 @@ const emit = defineEmits<{
   edit: [list: Catalog];
   remove: [list: Catalog];
   refresh: [list: Catalog];
+  order: [];
 }>();
-function arrange() {
-  arranging.value = !arranging.value;
-  if (arranging.value) {
-    clearFilters();
-    sortBy.value = "addon";
-  }
-}
 function closeMenus(event: PointerEvent) {
   document.querySelectorAll<HTMLDetailsElement>(".catalog-menu[open]").forEach((menu) => {
     if (!menu.contains(event.target as Node)) menu.open = false;
@@ -54,26 +46,6 @@ function closeMenus(event: PointerEvent) {
 }
 onMounted(() => document.addEventListener("pointerdown", closeMenus));
 onBeforeUnmount(() => document.removeEventListener("pointerdown", closeMenus));
-function startDrag(list: Catalog, event: DragEvent) {
-  if (!arranging.value || !canReorder.value || busy.value) {
-    event.preventDefault();
-    return;
-  }
-  dragged.value = list;
-  if (event.dataTransfer) {
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", catalogId(list));
-  }
-}
-async function dropOn(target: Catalog) {
-  const source = dragged.value;
-  dragged.value = null;
-  if (source && source !== target && canReorder.value && arranging.value && !busy.value)
-    await props.library.moveList(
-      source,
-      state.lists.indexOf(target) - state.lists.indexOf(source),
-    );
-}
 </script>
 <template>
   <div class="workspace content-width">
@@ -83,6 +55,7 @@ async function dropOn(target: Catalog) {
         <p v-if="state.lists.length">
           {{ state.lists.length }} {{ state.lists.length === 1 ? "list" : "lists" }} with
           {{ titleCount.toLocaleString() }} saved title entries.
+          <span v-if="hiddenCount">{{ hiddenCount }} hidden from your addon.</span>
         </p>
         <p v-else>Add a list, make it yours, then open it in your streaming app.</p>
       </div>
@@ -184,32 +157,30 @@ async function dropOn(target: Catalog) {
           >
             Needs attention <span>{{ attentionCount }}</span>
           </button>
+          <button
+            v-if="hiddenCount"
+            :aria-pressed="status === 'hidden'"
+            @click="status = 'hidden'"
+          >
+            Hidden <span>{{ hiddenCount }}</span>
+          </button>
         </div>
         <div class="collection-order">
           <label
-            ><span class="sr-only">Sort lists</span
-            ><select v-model="sortBy" aria-label="Sort lists">
-              <option value="addon">Addon order</option>
+            ><span class="sr-only">View order</span
+            ><select v-model="sortBy" aria-label="View order">
+              <option value="addon">Saved order</option>
               <option value="name">Name A–Z</option>
               <option value="titles">Most titles</option>
             </select></label
           ><button
-            class="text-button"
-            :class="{ 'arrange-active': arranging }"
+            class="button button-secondary reorder-trigger"
             :disabled="busy"
-            @click="arrange"
+            @click="emit('order')"
           >
-            <AppIcon :name="arranging ? 'check' : 'settings'" :size="15" />{{
-              arranging ? "Done arranging" : "Arrange"
-            }}
+            <AppIcon name="grip" :size="17" />Reorder lists
           </button>
         </div>
-      </div>
-      <div v-if="arranging && canReorder" class="arrange-note">
-        <AppIcon name="list" :size="17" /><span
-          >Drag lists into place, or use the up and down buttons. This changes their order
-          in your addon.</span
-        >
       </div>
       <div v-if="hasFilters && visibleLists.length" class="filtered-results">
         <span role="status"
@@ -224,7 +195,6 @@ async function dropOn(target: Catalog) {
         :class="{
           'layout-list': viewMode === 'list',
           'single-result': visibleLists.length === 1 && viewMode === 'grid',
-          'is-arranging': arranging && canReorder,
         }"
       >
         <CatalogCard
@@ -232,20 +202,10 @@ async function dropOn(target: Catalog) {
           :key="`${catalogId(list)}|${list.categoryName}`"
           :list="list"
           :busy="busy"
-          :index="state.lists.indexOf(list)"
-          :total="state.lists.length"
-          :reorderable="arranging && canReorder"
-          :dragging="dragged === list"
-          :draggable="arranging && canReorder && !busy"
-          @dragstart="startDrag(list, $event)"
-          @dragend="dragged = null"
-          @dragover.prevent
-          @drop.prevent="dropOn(list)"
           @preview="emit('preview', list)"
           @edit="emit('edit', list)"
           @remove="emit('remove', list)"
           @refresh="emit('refresh', list)"
-          @move="(direction) => library.moveList(list, direction)"
         />
       </div>
       <div v-else class="empty-state">

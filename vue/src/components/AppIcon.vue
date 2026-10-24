@@ -1,6 +1,7 @@
 <script setup lang="ts">
 withDefaults(defineProps<{ name: string; size?: number }>(), { size: 20 });
 const paths: Record<string, string[]> = {
+  grip: ["M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01"],
   layers: ["m12 3 10 5-10 5L2 8zM2 12l10 5 10-5M2 16l10 5 10-5"],
   list: ["M9 6h12M9 12h12M9 18h12M3 6h.01M3 12h.01M3 18h.01"],
   upload: ["M12 16V3m-5 5 5-5 5 5M3 16v5h18v-5"],

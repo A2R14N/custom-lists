@@ -3,8 +3,8 @@ import AppIcon from "./AppIcon.vue";
 import type { CatalogLibrary } from "../composables/useCatalogs";
 import { computed, ref, onBeforeUnmount } from "vue";
 const props = defineProps<{ library: CatalogLibrary }>();
-const { state, titleCount } = props.library;
-const savedCount = computed(() => state.lists.filter((list) => list.cached).length);
+const { state, addonLists, addonTitleCount } = props.library;
+const savedCount = computed(() => addonLists.value.filter((list) => list.cached).length);
 const revealInstall = ref(false),
   copied = ref(false);
 let copyTimer: ReturnType<typeof setTimeout>;
@@ -33,14 +33,20 @@ function installStremio() {
     <div class="install-summary">
       <span class="summary-mark"><AppIcon name="check" :size="23" /></span>
       <div>
-        <strong>Your collection is ready.</strong>
+        <strong>{{
+          addonLists.length ? "Your collection is ready." : "All lists are hidden."
+        }}</strong>
         <p>
           {{ savedCount }} saved {{ savedCount === 1 ? "list" : "lists" }} ·
-          {{ titleCount.toLocaleString() }} title entries
+          {{ addonTitleCount.toLocaleString() }} title entries
         </p>
       </div>
     </div>
-    <div v-if="savedCount < state.lists.length" class="alert alert-info">
+    <p v-if="addonLists.length < state.lists.length" class="field-hint">
+      {{ state.lists.length - addonLists.length }} hidden lists won’t appear in the addon.
+      Their saved titles are preserved.
+    </p>
+    <div v-if="savedCount < addonLists.length" class="alert alert-info">
       <AppIcon name="help" /><span
         >Some lists aren’t cached yet. They will appear empty until you import them.</span
       >

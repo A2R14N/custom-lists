@@ -27,9 +27,10 @@ Custom Lists is an Express addon with a Vue configuration interface. The Node an
 2. Provider imports advance one bounded page per request, storing temporary progress in that same Redis database. A completed import publishes a full snapshot in one write. Failed refreshes preserve the previous snapshot.
 3. File exports are parsed locally. Only selected normalized title rows reach the server, which validates them and publishes each snapshot with its configuration in one Redis transaction.
 4. Catalog requests read snapshots only. They do not contact list providers or start imports.
-5. Workspace search, category/source/status filters, layout and sorting are view-only. Arrangement mode persists addon order through drag-and-drop or explicit up/down actions.
+5. Workspace search, category/source/status filters, layout and sorting are view-only. A separate order editor keeps a draft with insertion moves, direct positions, sort presets and per-list visibility. One save validates that the draft is a complete permutation of the current lists, then writes only configuration. Cancel leaves the collection unchanged.
 6. Batch refresh runs unique eligible API snapshots sequentially, keeps each failure on its list, and holds a session lock until the queue completes. Stopping the queue finishes the current snapshot before skipping later lists.
 7. The optional homepage example reads public weekly movie trends through `src/services/trending.js`, using a separate server credential. `useTrendingExample` handles loading, stale labels and bundled artwork fallback. This flow uses no Redis and does not affect addon catalogs or saved-list covers.
+8. An optional `hidden: true` list field omits that category entry from the manifest. Missing or false means visible. It does not affect cache identities, cached catalog reads, imports or snapshots. Multiple category entries sharing a snapshot can have independent visibility.
 
 ## Compatibility rules
 

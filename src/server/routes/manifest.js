@@ -12,10 +12,14 @@ function logoUrl(req) {
 }
 
 function manifest(req, lists = []) {
-  const catalogs = lists.map((input) => {
-    const list = normalizeList(input);
-    return { id: catalogId(list), type: list.categoryName, name: listLabel(list) };
-  });
+  const catalogs = lists
+    .map(normalizeList)
+    .filter((list) => !list.hidden)
+    .map((list) => ({
+      id: catalogId(list),
+      type: list.categoryName,
+      name: listLabel(list),
+    }));
   return {
     // Stable identity and legacy IDs keep existing installations working.
     id: "community.trakt.custom-lists",

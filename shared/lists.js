@@ -24,6 +24,8 @@ export function normalizeList(input) {
   const name = String(input.name || "")
     .trim()
     .slice(0, 120);
+  if (Object.hasOwn(input, "hidden") && typeof input.hidden !== "boolean")
+    throw new Error("Invalid list visibility.");
   const sourceName =
     provider === "imdb" && typeof input.sourceName === "string"
       ? input.sourceName.trim().normalize("NFC")
@@ -62,6 +64,7 @@ export function normalizeList(input) {
     username: standalone ? "" : username,
     listId,
     categoryName,
+    ...(input.hidden === true ? { hidden: true } : {}),
     ...(name ? { name } : {}),
     ...(sourceName ? { sourceName } : {}),
     ...(sort && !standalone ? { sort } : {}),

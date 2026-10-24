@@ -64,6 +64,7 @@ onMounted(() => {
         @edit="dialogs?.openEdit"
         @refresh="dialogs?.refresh"
         @remove="dialogs?.openRemove"
+        @order="dialogs?.openDialog('order')"
       />
     </main>
     <SiteFooter @help="dialogs?.openDialog('help')" />

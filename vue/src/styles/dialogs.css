@@ -59,6 +59,192 @@
   color: var(--muted);
   font-size: 11px;
 }
+.order-tools {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+.order-tools label {
+  font-size: 12px;
+  color: var(--muted);
+}
+.order-tools select {
+  width: 210px;
+  margin-top: 7px;
+}
+.order-tools p,
+.order-instructions,
+.order-client-help {
+  color: var(--muted);
+  font-size: 12px;
+}
+.order-instructions {
+  margin: 17px 0 22px;
+  line-height: 1.7;
+}
+.order-columns {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr) 44px 88px;
+  gap: 10px;
+  padding: 0 10px 8px;
+  color: var(--subtle);
+  font-size: 11px;
+}
+.order-columns > :last-child,
+.order-columns > :nth-last-child(2) {
+  text-align: center;
+}
+.order-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.order-row {
+  display: grid;
+  grid-template-columns: 28px 46px minmax(0, 1fr) 44px 88px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 7px;
+}
+.order-row-hidden {
+  background: var(--canvas);
+}
+.order-drop-target {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: var(--accent-soft);
+}
+.order-handle {
+  cursor: grab;
+  width: 28px;
+  touch-action: pan-y;
+}
+.order-handle:active {
+  cursor: grabbing;
+}
+.order-position {
+  min-height: 38px;
+  padding: 7px 3px;
+  text-align: center;
+  font-size: 13px;
+  appearance: textfield;
+}
+.order-position::-webkit-inner-spin-button,
+.order-position::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+.order-title {
+  min-width: 0;
+}
+.order-title strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.order-title small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.order-title small span {
+  color: var(--warning);
+}
+.order-visible {
+  display: grid;
+  place-items: center;
+  min-height: 42px;
+  cursor: pointer;
+}
+.order-visible input,
+.visibility-control input {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  padding: 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.order-arrows {
+  display: flex;
+}
+.order-arrows .icon-button {
+  width: 44px;
+  height: 44px;
+}
+.order-client-help {
+  margin-top: 20px;
+}
+.order-client-help summary {
+  cursor: pointer;
+  color: var(--ink);
+}
+.order-client-help p {
+  margin-top: 9px;
+  line-height: 1.8;
+}
+.order-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+  padding-block: 12px;
+}
+.visibility-control {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 22px;
+  font-size: 13px;
+  cursor: pointer;
+}
+@media (max-width: 600px) {
+  .order-tools {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .order-tools label,
+  .order-tools select {
+    width: 100%;
+  }
+  .order-columns {
+    grid-template-columns: 44px minmax(0, 1fr) 30px 88px;
+    gap: 7px;
+    padding-inline: 0;
+  }
+  .order-row {
+    grid-template-columns: 44px minmax(0, 1fr) 30px 88px;
+    gap: 7px;
+    padding: 12px 0;
+  }
+  .order-handle {
+    display: none;
+  }
+  .order-title strong {
+    font-size: 12px;
+  }
+  .order-title small {
+    font-size: 10px;
+  }
+  .order-arrows {
+    gap: 0;
+  }
+  .order-footer {
+    gap: 8px;
+  }
+  .order-footer .button {
+    padding-inline: 12px;
+    font-size: 12px;
+  }
+}
 .dialog-footer .button {
   font-size: 12px;
 }

@@ -12,6 +12,7 @@ import CatalogPreview from "./CatalogPreview.vue";
 import ExportImport from "./ExportImport.vue";
 import HelpContent from "./HelpContent.vue";
 import ConnectionPanel from "./ConnectionPanel.vue";
+import ListOrderEditor from "./ListOrderEditor.vue";
 import { providerNames } from "../config/providers";
 import type { Catalog, Provider } from "../types/catalog";
 const props = defineProps<{ library: CatalogLibrary }>();
@@ -27,7 +28,8 @@ type DialogKind =
   | "help"
   | "export"
   | "connect"
-  | "restore";
+  | "restore"
+  | "order";
 const dialogKind = ref<DialogKind | null>(null);
 const providerHint = ref<Provider>("mdblist"),
   exportProvider = ref<"wetrakr" | "imdb">("wetrakr"),
@@ -37,6 +39,7 @@ const dialogTitle = computed(
   () =>
     ({
       add: "Add a list",
+      order: "List order & visibility",
       connect: "Connect your storage",
       restore: "Open your collection",
       export: `Import ${exportProvider.value === "imdb" ? "IMDb" : "WeTrakr"} lists`,
@@ -52,6 +55,7 @@ const dialogDescription = computed(
   () =>
     ({
       add: "Paste a public list link or import a file from your exports.",
+      order: "Put your lists in order and choose which rows appear in your addon.",
       connect: "Your lists and settings live in your own Upstash database.",
       restore: "Use your database credentials or private install link.",
       export:
@@ -158,7 +162,7 @@ defineExpose({
     :busy="
       state.saving || state.connecting || (dialogKind === 'export' && state.importing)
     "
-    :wide="dialogKind === 'preview'"
+    :wide="dialogKind === 'preview' || dialogKind === 'order'"
     @close="closeDialog"
   >
     <div
@@ -176,6 +180,12 @@ defineExpose({
       :initial-mode="dialogKind === 'restore' ? 'link' : 'database'"
       @connect="connect"
       @restore="restore"
+    />
+    <ListOrderEditor
+      v-else-if="dialogKind === 'order'"
+      :library="library"
+      @complete="closeDialog"
+      @cancel="closeDialog"
     />
     <AddListForm
       v-else-if="dialogKind === 'add'"

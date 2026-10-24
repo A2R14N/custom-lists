@@ -8,17 +8,12 @@ import type { Catalog } from "../types/catalog";
 const props = defineProps<{
   list: Catalog;
   busy: boolean;
-  index: number;
-  total: number;
-  reorderable?: boolean;
-  dragging?: boolean;
 }>();
 const emit = defineEmits<{
   preview: [];
   edit: [];
   remove: [];
   refresh: [];
-  move: [direction: number];
 }>();
 const menu = ref<HTMLDetailsElement>();
 const fromFile = computed(() => ["wetrakr", "imdb"].includes(props.list.provider));
@@ -39,7 +34,7 @@ function action(kind: "edit" | "remove" | "refresh") {
     class="catalog-card"
     :class="{
       'is-importing': list.status === 'importing',
-      'is-dragging': dragging,
+      'is-hidden': list.hidden,
       'has-error': !!list.error,
     }"
   >
@@ -60,14 +55,17 @@ function action(kind: "edit" | "remove" | "refresh") {
         "
       /><span class="catalog-art-cta"
         ><AppIcon name="play" :size="14" />Preview titles</span
-      ><span v-if="reorderable" class="catalog-position">{{ index + 1 }}</span>
+      >
     </button>
     <div class="catalog-body">
       <div class="catalog-title-row">
         <div>
           <span class="catalog-provider"
             ><span class="provider-dot" :class="list.provider"></span
-            >{{ providerNames[list.provider] }}</span
+            >{{ providerNames[list.provider]
+            }}<span v-if="list.hidden" class="catalog-hidden-label">
+              · Hidden from addon</span
+            ></span
           >
           <h2>
             <button :disabled="!list.cached || busy" @click="emit('preview')">
@@ -135,25 +133,8 @@ function action(kind: "edit" | "remove" | "refresh") {
                 : "Saved"
           }}</span
         >
-        <div v-if="reorderable" class="reorder-buttons">
-          <button
-            class="icon-button"
-            :disabled="busy || index === 0"
-            :aria-label="`Move ${listLabel(list)} up`"
-            @click="emit('move', -1)"
-          >
-            <AppIcon name="up" :size="16" /></button
-          ><button
-            class="icon-button"
-            :disabled="busy || index === total - 1"
-            :aria-label="`Move ${listLabel(list)} down`"
-            @click="emit('move', 1)"
-          >
-            <AppIcon name="down" :size="16" />
-          </button>
-        </div>
         <button
-          v-else-if="list.provider !== 'trakt'"
+          v-if="list.provider !== 'trakt'"
           class="text-button catalog-refresh"
           :disabled="busy"
           :aria-label="`${fromFile ? 'Upload updated export for' : list.error ? 'Retry refresh for' : 'Refresh'} ${listLabel(list)}`"

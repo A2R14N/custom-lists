@@ -73,15 +73,18 @@ export function useCatalogs(options: CatalogOptions = {}) {
       };
     }
   });
-  const titleCount = computed(() => {
+  function countTitles(lists: Catalog[]) {
     const seen = new Set<string>();
-    return state.lists.reduce((count, list) => {
+    return lists.reduce((count, list) => {
       const key = catalogId(list);
       if (seen.has(key)) return count;
       seen.add(key);
       return count + list.itemCount;
     }, 0);
-  });
+  }
+  const titleCount = computed(() => countTitles(state.lists));
+  const addonLists = computed(() => state.lists.filter((list) => !list.hidden));
+  const addonTitleCount = computed(() => countTitles(addonLists.value));
   const canImport = (list: ListDefinition) =>
     list.provider === "mdblist"
       ? !!state.mdblistApiKey.trim()
@@ -382,7 +385,12 @@ export function useCatalogs(options: CatalogOptions = {}) {
     if (state.refreshingAll) state.stopAfterCurrent = true;
   }
 
-  async function editList(list: Catalog, name: string, categoryName: string) {
+  async function editList(
+    list: Catalog,
+    name: string,
+    categoryName: string,
+    hidden = !!list.hidden,
+  ) {
     if (busy.value) return false;
     state.error = "";
     let definition: ListDefinition;
@@ -391,13 +399,14 @@ export function useCatalogs(options: CatalogOptions = {}) {
         ...list,
         name,
         categoryName,
+        hidden,
       }) as ListDefinition;
     } catch (error) {
       state.error = messageOf(error);
       return false;
     }
     const next = state.lists.map((item) =>
-      item === list ? { ...item, ...definition, name: definition.name } : item,
+      item === list ? { ...item, ...definition, name: definition.name, hidden } : item,
     );
     if (!(await persist(next))) return false;
     state.lists = next;
@@ -450,10 +459,45 @@ export function useCatalogs(options: CatalogOptions = {}) {
     if (index < 0 || target < 0 || target >= state.lists.length) return false;
     state.error = "";
     const next = [...state.lists];
-    [next[index], next[target]] = [next[target], next[index]];
+    next.splice(target, 0, ...next.splice(index, 1));
+    return saveListLayout(next);
+  }
+
+  async function saveListLayout(proposed: Catalog[]) {
+    if (busy.value) return false;
+    state.error = "";
+    const keyOf = (list: ListDefinition) => `${catalogId(list)}|${list.categoryName}`;
+    let definitions: ListDefinition[];
+    try {
+      definitions = proposed.map((list) => normalizeList(list) as ListDefinition);
+    } catch (error) {
+      state.error = messageOf(error);
+      return false;
+    }
+    const current = new Map(state.lists.map((list) => [keyOf(list), list]));
+    const keys = definitions.map(keyOf);
+    if (
+      keys.length !== current.size ||
+      new Set(keys).size !== keys.length ||
+      keys.some((key) => !current.has(key))
+    ) {
+      state.error = "Your lists changed. Reopen the order editor and try again.";
+      return false;
+    }
+    const next = definitions.map((definition) => ({
+      ...current.get(keyOf(definition))!,
+      hidden: !!definition.hidden,
+    }));
+    const changed = next.some(
+      (list, index) =>
+        keyOf(list) !== keyOf(state.lists[index]) ||
+        !!list.hidden !== !!state.lists[index].hidden,
+    );
+    if (!changed) return true;
     if (!(await persist(next))) return false;
     state.lists = next;
-    state.message = "Catalog order saved.";
+    state.message =
+      "List order and visibility saved. Refresh the addon in your app to see changes.";
     return true;
   }
 
@@ -512,6 +556,8 @@ export function useCatalogs(options: CatalogOptions = {}) {
     busy,
     parsed,
     titleCount,
+    addonLists,
+    addonTitleCount,
     canImport,
     connect,
     restore,
@@ -525,6 +571,7 @@ export function useCatalogs(options: CatalogOptions = {}) {
     cacheExport,
     editList,
     moveList,
+    saveListLayout,
     removeList,
     previewList,
     buildAddonUrl,

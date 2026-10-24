@@ -8,7 +8,7 @@ export function useCollectionFilters(state: CatalogState) {
   const filter = ref<SourceFilter>("all");
   const search = ref("");
   const category = ref("");
-  const status = ref<"all" | "saved" | "attention">("all");
+  const status = ref<"all" | "saved" | "attention" | "hidden">("all");
   const viewMode = ref<"grid" | "list">("grid");
   const categories = computed(() =>
     [...new Set(state.lists.map((list) => list.categoryName))].sort(),
@@ -21,9 +21,11 @@ export function useCollectionFilters(state: CatalogState) {
         (filter.value === "all" || list.provider === filter.value) &&
         (!category.value || list.categoryName === category.value) &&
         (status.value === "all" ||
-          (status.value === "saved"
-            ? list.cached && !list.error
-            : !list.cached || !!list.error)) &&
+          (status.value === "hidden"
+            ? !!list.hidden
+            : status.value === "saved"
+              ? list.cached && !list.error
+              : !list.cached || !!list.error)) &&
         `${listLabel(list)} ${list.categoryName} ${list.username} ${providerNames[list.provider]}`
           .toLowerCase()
           .includes(query),

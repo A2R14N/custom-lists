@@ -19,6 +19,7 @@ export interface ExportList {
   metas: Meta[];
 }
 export interface ListDefinition {
+  hidden?: boolean;
   sourceName?: string;
   provider: Provider;
   username: string;
